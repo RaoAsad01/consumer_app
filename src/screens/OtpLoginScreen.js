@@ -1,29 +1,26 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as SecureStore from 'expo-secure-store';
+import { StatusBar } from 'expo-status-bar';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Alert,
+  Dimensions,
+  Keyboard,
+  Modal,
+  Platform,
   StyleSheet,
-  Text,
-  View,
   TextInput,
   TouchableOpacity,
-  Keyboard,
   TouchableWithoutFeedback,
-  Platform,
-  Alert,
-  Modal,
-  Dimensions
+  View
 } from 'react-native';
-import { Image as ExpoImage, ImageBackground as ExpoImageBackground } from 'expo-image';
-import { useNavigation } from '@react-navigation/native';
-import { color } from '../color/color';
-import { StatusBar } from 'expo-status-bar';
 import SvgIcons from '../../components/SvgIcons';
 import { authService, eventService } from '../api/apiService';
-import * as SecureStore from 'expo-secure-store';
-import { LinearGradient } from 'expo-linear-gradient';
-import Typography, { Body1, Caption } from '../components/Typography';
-import MiddleSection from '../components/MiddleSection';
-import OtpSuccessPopup from '../constants/OtpSuccessPopup';
+import { color } from '../color/color';
+import Typography from '../components/Typography';
 import OtpErrorPopup from '../constants/OtpErrorPopup';
+import OtpSuccessPopup from '../constants/OtpSuccessPopup';
 
 // Helper function to format seconds as mm:ss
 function formatTime(seconds) {
@@ -408,15 +405,29 @@ const OtpLoginScreen = ({ route }) => {
 
             {/* Footer with Logo */}
             {!isKeyboardVisible && (
-              <>
-                <View style={styles.logoContainer}>
-                  <SvgIcons.hexalloSvg width={40} height={40} />
-                </View>
-                <View style={styles.footerSection}>
-                  {/* Footer text removed as per requirement */}
-                </View>
-              </>
-            )}
+                <>
+                  <View style={styles.logoContainer}>
+                    <SvgIcons.hexalloSvg width={40} height={40} />
+                  </View>
+                  <View style={styles.footerSection}>
+                    <Typography
+                      weight="450"
+                      size={14}
+                      color={color.brown_766F6A}
+                      style={styles.footerText}
+                    >
+                      By registering, you accept our{' '}
+                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                        Terms of Use
+                      </Typography>
+                      {' '}and{' '}
+                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                        Privacy Policy
+                      </Typography>
+                    </Typography>
+                  </View>
+                </>
+              )}
           </View>
 
           {/* Popups */}
@@ -608,9 +619,17 @@ const styles = StyleSheet.create({
   },
   footerSection: {
     alignItems: 'center',
-    paddingBottom: 120,
+    paddingBottom: 30,
     paddingTop: 20,
     paddingHorizontal: 16,
+  },
+  footerText: {
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 50,
+  },
+  linkText: {
+    textDecorationLine: 'underline',
   },
   logoContainer: {
     alignItems: 'center',
