@@ -12,6 +12,7 @@ import SplashScreenComponent from '../screens/SplashScreen';
 import InitialScreen from '../screens/InitialScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import StaffDashboard from '../screens/dashboard/StaffDashboard';
+import GetStartedScreen from '../screens/GetStartedScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -84,6 +85,18 @@ function Navigation({ route }) {
       <Stack.Screen 
         name="OtpLogin" 
         component={OtpLoginScreen} 
+        options={{ 
+          headerShown: false,
+          unmountOnBlur: true,
+          statusBarHidden: true,
+          statusBarStyle: 'light',
+          statusBarTranslucent: true,
+          animation: 'fade'
+        }} 
+      />
+      <Stack.Screen 
+        name="GetStarted" 
+        component={GetStartedScreen} 
         options={{ 
           headerShown: false,
           unmountOnBlur: true,

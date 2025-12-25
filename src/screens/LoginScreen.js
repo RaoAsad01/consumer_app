@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet, View, TextInput, TouchableOpacity, Platform, Keyboard,
-  TouchableWithoutFeedback, Text, Dimensions, Animated
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { color } from '../color/color';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  Keyboard,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput, TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
+import * as Yup from 'yup';
 import SvgIcons from '../../components/SvgIcons';
 import { authService } from '../api/apiService';
-import Typography, { Body1, Caption } from '../components/Typography';
-import { fontSize, fontWeight } from '../constants/typography';
-import MiddleSection from '../components/MiddleSection';
+import { color } from '../color/color';
 import CountryCodePicker from '../components/CountryCodePicker';
+import Typography, { Caption } from '../components/Typography';
 import { defaultCountryCode } from '../constants/countryCodes';
 import { getAutoDetectedCountry } from '../utils/countryDetection';
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal } from 'react-native';
-import { color } from '../color/color';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import SvgIcons from '../../components/SvgIcons';
+import { color } from '../color/color';
 import Typography from '../components/Typography';
 
 const OtpErrorPopup = ({ 
@@ -35,14 +35,14 @@ const OtpErrorPopup = ({
                     <Typography style={styles.title}
                         weight="500"
                         size={18}
-                        color={color.grey_DEDCDC}>
+                        color={color.brown_766F6A}>
                         {title}
                     </Typography>
 
                     <Typography style={styles.subtitle}
                         weight="400"
                         size={14}
-                        color={color.white_CDCDCD}>
+                        color={color.brown_766F6A}>
                         {subtitle}
                     </Typography>
 
@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     resendButton: {
-        backgroundColor: '#131314',
         paddingVertical: 12,
         paddingHorizontal: 24,
         alignSelf: 'center',

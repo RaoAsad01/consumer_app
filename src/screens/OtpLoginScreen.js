@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -16,7 +15,7 @@ import {
   View
 } from 'react-native';
 import SvgIcons from '../../components/SvgIcons';
-import { authService, eventService } from '../api/apiService';
+import { authService } from '../api/apiService';
 import { color } from '../color/color';
 import Typography from '../components/Typography';
 import OtpErrorPopup from '../constants/OtpErrorPopup';
@@ -93,127 +92,112 @@ const OtpLoginScreen = ({ route }) => {
   }
 
   const handleSignIn = async (otpArray) => {
-    const enteredOtp = otpArray.join('');
-    console.log('handleSignIn called with OTP:', enteredOtp);
-    if (enteredOtp.length === 5) {
-      setLoading(true);
-      try {
-        const payload = {
-          uuid: uuid,
-          otp: enteredOtp
-        };
-        const response = await authService.verifyOtp(payload);
-        console.log('OTP verify response:', response);
-        if (response.success && response.data && response.data.access_token) {
-          setShowError(false);
-          setErrorMessage('');
-          setLoading(false);
-          // Store the access token
-          await SecureStore.setItemAsync('accessToken', response.data.access_token);
-          // Fetch staff events
-          const staffEventsData = await eventService.fetchStaffEvents();
-          console.log('Staff events data structure:', JSON.stringify(staffEventsData, null, 2));
-          const eventsList = staffEventsData?.data;
-          console.log('Events list:', eventsList);
-          
-          // Handle different data structures for ADMIN vs Organizer roles
-          let selectedEvent = null;
-          
-          if (eventsList && eventsList.length > 0) {
-                      // For organizer role: eventsList[0] contains {events: [...], staff: "..."}
-          if (eventsList[0].events && Array.isArray(eventsList[0].events)) {
-            console.log('Organizer role detected - events array found');
-            console.log('Events array:', eventsList[0].events);
-            if (eventsList[0].events.length > 0) {
-              selectedEvent = eventsList[0].events[0];
-              console.log('Selected event from organizer role:', selectedEvent);
-            }
-          } else {
-            // For admin role or direct event structure
-            console.log('Admin role or direct event structure detected');
-            selectedEvent = eventsList[0];
-            console.log('Selected event from admin role:', selectedEvent);
-          }
-          }
-          
-          if (selectedEvent) {
-            const eventUuid = selectedEvent.uuid || selectedEvent.eventUuid;
-            console.log('Selected event UUID:', eventUuid);
-            
-            try {
-              // Fetch event info
-              const eventInfoData = await eventService.fetchEventInfo(eventUuid);
-              
-              // Store the selected event UUID for app restart scenarios
-              await SecureStore.setItemAsync('lastSelectedEventUuid', eventUuid);
-              console.log('Stored last selected event UUID:', eventUuid);
-              
-              // Verify the storage worked
-              const storedUuid = await SecureStore.getItemAsync('lastSelectedEventUuid');
-              console.log('Verified stored UUID:', storedUuid);
-              
-              navigation.reset({
-                index: 0,
-                routes: [{
-                  name: 'LoggedIn',
-                  params: {
-                    eventInfo: {
-                      staff_name: eventInfoData?.data?.staff_name,
-                      event_title: eventInfoData?.data?.event_title,
-                      cityName: eventInfoData?.data?.location?.city,
-                      date: eventInfoData?.data?.start_date,
-                      time: eventInfoData?.data?.start_time,
-                      userId: eventInfoData?.data?.staff_id,
-                      scanCount: eventInfoData?.data?.scan_count,
-                      event_uuid: eventInfoData?.data?.location?.uuid,
-                      eventUuid: eventUuid
-                    },
-                  },
-                }],
-              });
-            } catch (eventError) {
-              console.error('Error fetching event info:', eventError);
-              
-              // Handle business logic errors gracefully
-              if (eventError.isBusinessError) {
-                console.log('Business logic error - proceeding without event data');
-                // Still navigate to logged in screen, just without event data
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'LoggedIn' }],
-                });
-              } else {
-                // For other errors, show error message but still navigate
-                setErrorMessage('Unable to load event details. Please try again later.');
-                setShowError(true);
-                setLoading(false);
-                setTimeout(() => {
-                  navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'LoggedIn' }],
-                  });
-                }, 2000);
-              }
-            }
-          } else {
-            console.log('No events found - proceeding without event data');
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'LoggedIn' }],
-            });
-          }
-        } else {
-          setErrorMessage('You have entered an invalid OTP');
-          setShowError(true);
-          setLoading(false);
-        }
-      } catch (error) {
-        setErrorMessage('You have entered an invalid OTP');
-        setShowError(true);
-        setLoading(false);
-        console.log('OTP Verification Error:', error);
-      }
-    }
+    navigation.navigate('GetStarted', {
+      user_identifier: userIdentifier
+    })
+    // const enteredOtp = otpArray.join('');
+    // console.log('handleSignIn called with OTP:', enteredOtp);
+    // if (enteredOtp.length === 5) {
+    //   setLoading(true);
+    //   try {
+    //     const payload = {
+    //       uuid: uuid,
+    //       otp: enteredOtp
+    //     };
+    //     const response = await authService.verifyOtp(payload);
+    //     console.log('OTP verify response:', response);
+    //     if (response.success && response.data && response.data.access_token) {
+    //       setShowError(false);
+    //       setErrorMessage('');
+    //       setLoading(false);
+    //       // Store the access token
+    //       await SecureStore.setItemAsync('accessToken', response.data.access_token);
+    //       // Fetch staff events
+    //       const staffEventsData = await eventService.fetchStaffEvents();
+    //       console.log('Staff events data structure:', JSON.stringify(staffEventsData, null, 2));
+    //       const eventsList = staffEventsData?.data;
+    //       console.log('Events list:', eventsList);
+
+    //       // Handle different data structures for ADMIN vs Organizer roles
+    //       let selectedEvent = null;
+
+    //       if (eventsList && eventsList.length > 0) {
+    //         // For organizer role: eventsList[0] contains {events: [...], staff: "..."}
+    //         if (eventsList[0].events && Array.isArray(eventsList[0].events)) {
+    //           console.log('Organizer role detected - events array found');
+    //           console.log('Events array:', eventsList[0].events);
+    //           if (eventsList[0].events.length > 0) {
+    //             selectedEvent = eventsList[0].events[0];
+    //             console.log('Selected event from organizer role:', selectedEvent);
+    //           }
+    //         } else {
+    //           // For admin role or direct event structure
+    //           console.log('Admin role or direct event structure detected');
+    //           selectedEvent = eventsList[0];
+    //           console.log('Selected event from admin role:', selectedEvent);
+    //         }
+    //       }
+
+    //       if (selectedEvent) {
+    //         const eventUuid = selectedEvent.uuid || selectedEvent.eventUuid;
+    //         console.log('Selected event UUID:', eventUuid);
+
+    //         try {
+    //           // Fetch event info
+    //           const eventInfoData = await eventService.fetchEventInfo(eventUuid);
+
+    //           // Store the selected event UUID for app restart scenarios
+    //           await SecureStore.setItemAsync('lastSelectedEventUuid', eventUuid);
+    //           console.log('Stored last selected event UUID:', eventUuid);
+
+    //           // Verify the storage worked
+    //           const storedUuid = await SecureStore.getItemAsync('lastSelectedEventUuid');
+    //           console.log('Verified stored UUID:', storedUuid);
+
+    //           navigation.navigate('GetStarted', {
+    //             user_identifier: userIdentifier
+    //           });
+    //         } catch (eventError) {
+    //           console.error('Error fetching event info:', eventError);
+
+    //           // Handle business logic errors gracefully
+    //           if (eventError.isBusinessError) {
+    //             console.log('Business logic error - proceeding without event data');
+    //             // Navigate to GetStarted screen
+    //             navigation.navigate('GetStarted', {
+    //               user_identifier: userIdentifier
+    //             });
+    //           } else {
+    //             // For other errors, show error message but still navigate
+    //             setErrorMessage('Unable to load event details. Please try again later.');
+    //             setShowError(true);
+    //             setLoading(false);
+    //             setTimeout(() => {
+    //               navigation.reset({
+    //                 index: 0,
+    //                 routes: [{ name: 'LoggedIn' }],
+    //               });
+    //             }, 2000);
+    //           }
+    //         }
+    //       } else {
+    //         console.log('No events found - proceeding to GetStarted');
+    //         navigation.navigate('GetStarted', {
+    //           user_identifier: userIdentifier
+    //         });
+    //       }
+    //     } else {
+    //       setErrorMessage('You have entered an invalid OTP');
+    //       setShowError(true);
+    //       setLoading(false);
+    //     }
+    //   } catch (error) {
+    //     setErrorMessage('You have entered an invalid OTP');
+    //     setShowError(true);
+    //     setLoading(false);
+    //     console.log('OTP Verification Error:', error);
+    //   }
+    // }
   };
 
   const handleResendOtp = async () => {
@@ -302,8 +286,11 @@ const OtpLoginScreen = ({ route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <StatusBar style="dark" backgroundColor="transparent" translucent />
-          
+          <StatusBar  style="light"
+            backgroundColor="transparent"
+            translucent
+            hidden={true} />
+
           <View style={styles.container}>
             {/* Header Section */}
             <View style={styles.headerSection}>
@@ -349,17 +336,6 @@ const OtpLoginScreen = ({ route }) => {
                 ))}
               </View>
 
-              {showError && (
-                <View style={styles.errorContainer}>
-                  <TouchableOpacity onPress={dismissError}>
-                    <SvgIcons.crossIconRed width={20} height={20} fill={color.red_FF3B30} />
-                  </TouchableOpacity>
-                  <Typography weight="400" size={14} color={color.red_EF3E32} style={styles.errorText}>
-                    {errorMessage}
-                  </Typography>
-                </View>
-              )}
-
               {/* Resend/Timer and Try Another Way */}
               <View style={styles.actionRow}>
                 {otpResendTime > 0 ? (
@@ -401,33 +377,44 @@ const OtpLoginScreen = ({ route }) => {
                   </Typography>
                 </TouchableOpacity>
               </View>
+              {showError && (
+              <View style={styles.errorContainer}>
+                <TouchableOpacity onPress={dismissError}>
+                  <SvgIcons.crossIconRed width={20} height={20} fill={color.red_FF3B30} />
+                </TouchableOpacity>
+                <Typography weight="400" size={14} color={color.red_EF3E32} style={styles.errorText}>
+                  {errorMessage}
+                </Typography>
+              </View>
+            )}
             </View>
+
 
             {/* Footer with Logo */}
             {!isKeyboardVisible && (
-                <>
-                  <View style={styles.logoContainer}>
-                    <SvgIcons.hexalloSvg width={40} height={40} />
-                  </View>
-                  <View style={styles.footerSection}>
-                    <Typography
-                      weight="450"
-                      size={14}
-                      color={color.brown_766F6A}
-                      style={styles.footerText}
-                    >
-                      By registering, you accept our{' '}
-                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
-                        Terms of Use
-                      </Typography>
-                      {' '}and{' '}
-                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
-                        Privacy Policy
-                      </Typography>
+              <>
+                <View style={styles.logoContainer}>
+                  <SvgIcons.hexalloSvg width={40} height={40} />
+                </View>
+                <View style={styles.footerSection}>
+                  <Typography
+                    weight="450"
+                    size={14}
+                    color={color.brown_766F6A}
+                    style={styles.footerText}
+                  >
+                    By registering, you accept our{' '}
+                    <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                      Terms of Use
                     </Typography>
-                  </View>
-                </>
-              )}
+                    {' '}and{' '}
+                    <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                      Privacy Policy
+                    </Typography>
+                  </Typography>
+                </View>
+              </>
+            )}
           </View>
 
           {/* Popups */}
@@ -436,11 +423,11 @@ const OtpLoginScreen = ({ route }) => {
             onClose={handleCloseSuccessPopup}
             title="OTP Sent Successfully"
             subtitle={
-              selectedOtpSource === 'WHATSAPP' 
+              selectedOtpSource === 'WHATSAPP'
                 ? "We've sent a one-time password to your WhatsApp"
                 : selectedOtpSource === 'SMS'
-                ? "We've sent a one-time password via SMS"
-                : "We've sent a one-time password to your email"
+                  ? "We've sent a one-time password via SMS"
+                  : "We've sent a one-time password to your email"
             }
           />
           <OtpErrorPopup
@@ -514,7 +501,7 @@ const OtpLoginScreen = ({ route }) => {
                     onPress={() => handleOtpSourceSelect('EMAIL')}
                   >
                     <View style={styles.optionContent}>
-                      <SvgIcons.emailBlackIcon width={24} height={24}/>
+                      <SvgIcons.emailBlackIcon width={24} height={24} />
                       <Typography
                         weight="400"
                         size={14}
@@ -564,13 +551,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     minWidth: 300,
-    marginBottom: 30,
+    marginBottom: 10,
   },
   otpInput: {
-    width: 60,
+    width: 55,
     height: 50,
     borderRadius: 10,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: color.borderBrown_CEBCA0,
     textAlign: 'center',
     fontSize: 20,
@@ -591,7 +578,7 @@ const styles = StyleSheet.create({
   timerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    
+
   },
   resendOtpButton: {
     paddingVertical: 8,
@@ -606,13 +593,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: color.red_FF0000,
     gap: 10,
     width: '100%',
-    maxWidth: 300,
+    minWidth: 300,
   },
   errorText: {
     flex: 1,
@@ -642,7 +629,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
-   justifyContent: 'center',
+    justifyContent: 'center',
     backgroundColor: color.white_FFFFFF,
     borderRadius: 15,
     padding: 20,
