@@ -48,20 +48,20 @@ const OtpSuccessPopup = ({ visible, onClose, title = "OTP Sent Successfully", su
                 <View style={styles.modalContainer}>
                     <View style={styles.iconContainer}>
                         <View style={styles.successIconCircle}>
-                            <SvgIcons.successBrownSVG width={48} height={48} fill={color.white_FFFFFF} />
+                            <SvgIcons.successBrownSVG width={38} height={38} fill={color.white_FFFFFF} />
                         </View>
                     </View>
                     
                     <Typography style={styles.title}
-                        weight="500"
-                        size={18}
+                        weight="700"
+                        size={15}
                         color={color.brown_766F6A}>
                         {title}
                     </Typography>
 
                     <Typography style={styles.subtitle}
                         weight="400"
-                        size={14}
+                        size={13}
                         color={color.brown_766F6A}>
                         {subtitle}
                     </Typography>

@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  SafeAreaView,
-  Text,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import SvgIcons from '../../components/SvgIcons';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
 
 const { width, height } = Dimensions.get('window');
@@ -54,10 +54,11 @@ const SplashScreenComponent = () => {
   return (
     <View style={styles.container}>
       <StatusBar
-        style="light"
-        backgroundColor="#AE6F28"
-        translucent={false}
-      />
+            style="light"
+            backgroundColor="transparent"
+            translucent
+            hidden={true}
+          />
       <SafeAreaView style={styles.safeArea}>
         {/* Top Section - Brown Background with Logo and Text */}
         <View style={styles.topSection}>
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   bottomSection: {
-    flex: 0.57,
+    flex: 0.60,
     width,   
     overflow: 'hidden',
   },

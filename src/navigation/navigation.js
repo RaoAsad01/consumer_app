@@ -1,18 +1,18 @@
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../screens/LoginScreen';
-import MyTabs from '../screens/MyTabs';
-import OtpLoginScreen from '../screens/OtpLoginScreen';
-import TicketsTab from '../screens/TicketsTab';
+import React from 'react';
 import BoxOfficeTab from '../screens/BoxOfficeTab';
 import CheckInAllTickets from '../screens/CheckInAllTickets';
-import ManualCheckInAllTickets from '../screens/ManualcheckInAllTickets';
-import TicketScanned from '../screens/TicketScanned';
-import SplashScreenComponent from '../screens/SplashScreen';
-import InitialScreen from '../screens/InitialScreen';
-import OnboardingScreen from '../screens/OnboardingScreen';
 import StaffDashboard from '../screens/dashboard/StaffDashboard';
 import GetStartedScreen from '../screens/GetStartedScreen';
+import InitialScreen from '../screens/InitialScreen';
+import LoginScreen from '../screens/LoginScreen';
+import ManualCheckInAllTickets from '../screens/ManualcheckInAllTickets';
+import MyTabs from '../screens/MyTabs';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import OtpLoginScreen from '../screens/OtpLoginScreen';
+import SplashScreenComponent from '../screens/SplashScreen';
+import TicketScanned from '../screens/TicketScanned';
+import TicketsTab from '../screens/TicketsTab';
 
 const Stack = createNativeStackNavigator();
 

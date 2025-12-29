@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    Modal,
     FlatList,
-    TextInput,
-    StyleSheet,
+    Modal,
     SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { color } from '../color/color';
-import Typography from './Typography';
 import SvgIcons from '../../components/SvgIcons';
+import { color } from '../color/color';
 import { countryCodes } from '../constants/countryCodes';
+import Typography from './Typography';
 
 const CountryCodePicker = ({
     selectedCountry,
@@ -55,7 +55,7 @@ const CountryCodePicker = ({
                     <Typography
                         weight="500"
                         size={16}
-                        color={color.grey_DEDCDC}
+                        color={color.grey_87807C}
                         style={styles.countryName}
                     >
                         {item.name}
@@ -73,7 +73,7 @@ const CountryCodePicker = ({
             <Typography
                 weight="600"
                 size={16}
-                color={color.grey_DEDCDC}
+                color={color.brown_3C200A}
                 style={styles.dialCode}
             >
                 {item.dialCode}
@@ -97,7 +97,7 @@ const CountryCodePicker = ({
                     <Typography
                         weight="600"
                         size={18}
-                        color={color.grey_DEDCDC}
+                        color={color.brown_3C200A}
                         style={styles.headerTitle}
                     >
                         Select Country
@@ -129,18 +129,17 @@ const CountryCodePicker = ({
                     </View>
                 </View>
 
-                {/* Countries List */}
-                <FlatList
-                    data={filteredCountries}
-                    renderItem={renderCountryItem}
-                    keyExtractor={(item) => item.code}
-                    style={styles.list}
-                    showsVerticalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <View style={styles.separator} />}
-                />
-
-                {/* No Results */}
-                {filteredCountries.length === 0 && (
+                {/* Countries List or No Results */}
+                {filteredCountries.length > 0 ? (
+                    <FlatList
+                        data={filteredCountries}
+                        renderItem={renderCountryItem}
+                        keyExtractor={(item) => item.code}
+                        style={styles.list}
+                        showsVerticalScrollIndicator={false}
+                        ItemSeparatorComponent={() => <View style={styles.separator} />}
+                    />
+                ) : (
                     <View style={styles.noResults}>
                         <Typography
                             weight="400"
@@ -160,7 +159,7 @@ const CountryCodePicker = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'rgba(19, 19, 20, 0.95)',
+        backgroundColor: color.white_FFFFFF,
     },
     header: {
         flexDirection: 'row',
@@ -188,17 +187,16 @@ const styles = StyleSheet.create({
     searchInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(26, 26, 27, 0.9)',
         borderRadius: 10,
         paddingHorizontal: 15,
         borderWidth: 1,
-        borderColor: color.borderBrown_CEBCA0,
+        borderColor: color.btnBrown_AE6F28,
         height: 46,
     },
     searchInput: {
         flex: 1,
         marginLeft: 10,
-        color: color.grey_DEDCDC,
+        color: color.grey_87807C,
         fontSize: 16,
         fontWeight: '400',
     },
@@ -246,7 +244,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 50,
     },
     noResultsText: {
         textAlign: 'center',

@@ -1,17 +1,17 @@
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  SafeAreaView,
-  FlatList,
-  Text,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
-import SvgIcons from '../../components/SvgIcons';
 import { StatusBar } from 'expo-status-bar';
+import React, { useRef, useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
 
 const { width, height } = Dimensions.get('window');

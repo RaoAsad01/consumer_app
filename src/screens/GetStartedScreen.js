@@ -5,17 +5,17 @@ import { StatusBar } from 'expo-status-bar';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import {
-    Dimensions,
-    Keyboard,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Dimensions,
+  Keyboard,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import * as Yup from 'yup';
 import SvgIcons from '../../components/SvgIcons';
@@ -42,7 +42,9 @@ const GetStartedScreen = ({ route }) => {
   const [isDetectingCountry, setIsDetectingCountry] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
+  const [isFormValid, setIsFormValid] = useState(false);
   const formikRef = React.useRef(null);
+  const prevValuesRef = React.useRef({});
   
   // Initialize calendar to current date or selected date
   useEffect(() => {
@@ -105,6 +107,29 @@ const GetStartedScreen = ({ route }) => {
     }
   }, [isEmailLogin]);
 
+  // Helper function to check form validity
+  const checkFormValidity = (formValues, formErrors, currentDateOfBirth, currentSelectedGender, currentIsEmailLogin) => {
+    const hasFullName = formValues?.fullName && formValues.fullName.trim().length >= 1;
+    const hasDateOfBirth = formValues?.dateOfBirth || currentDateOfBirth;
+    const hasEmail = currentIsEmailLogin ? (formValues?.email && formValues.email.trim().length > 0) : true;
+    const hasPhoneNumber = !currentIsEmailLogin ? (formValues?.phoneNumber && formValues.phoneNumber.trim().length >= 7) : true;
+    const hasGender = formValues?.gender || currentSelectedGender;
+    const noErrors = !formErrors?.fullName && !formErrors?.dateOfBirth && 
+                    (!currentIsEmailLogin || !formErrors?.email) && 
+                    (currentIsEmailLogin || !formErrors?.phoneNumber) && 
+                    !formErrors?.gender;
+    
+    return hasFullName && hasDateOfBirth && hasEmail && hasPhoneNumber && hasGender && noErrors;
+  };
+
+  // Check form validity whenever form values or state changes
+  useEffect(() => {
+    if (formikRef.current) {
+      const { values, errors } = formikRef.current;
+      setIsFormValid(checkFormValidity(values, errors, dateOfBirth, selectedGender, isEmailLogin));
+    }
+  }, [dateOfBirth, selectedGender, isEmailLogin]);
+
   const validationSchema = Yup.object().shape({
     fullName: Yup.string()
       .min(2, 'Full name must be at least 2 characters')
@@ -122,6 +147,32 @@ const GetStartedScreen = ({ route }) => {
     gender: Yup.string()
       .required('Gender is required'),
   });
+
+  // Format date for display: "Thu 18 December 2025"
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      // Parse DD-MM-YYYY format
+      const [day, month, year] = dateString.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      
+      // Get day name (Thu)
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayName = dayNames[date.getDay()];
+      
+      // Get month name (December)
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      const monthName = monthNames[date.getMonth()];
+      
+      return `${dayName} ${parseInt(day)} ${monthName} ${year}`;
+    } catch (error) {
+      return dateString; // Return original if parsing fails
+    }
+  };
 
   const handleDateSelect = (day, month, year, setFieldValue) => {
     const formattedDate = `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
@@ -234,20 +285,21 @@ const GetStartedScreen = ({ route }) => {
   };
 
   const handleContinue = async (values) => {
-    // TODO: Handle form submission - navigate to next screen or submit to API
-    console.log('Form values:', values);
-    // For now, navigate to LoggedIn screen
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'LoggedIn' }],
-    });
+    // // TODO: Handle form submission - navigate to next screen or submit to API
+    // console.log('Form values:', values);
+    // // For now, navigate to LoggedIn screen
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: 'LoggedIn' }],
+    // });
   };
 
   const genders = ['Male', 'Female', 'Other'];
 
   return (
     <LinearGradient
-      colors={['#FFFFFF', '#F5F5F5', '#E8E0D6']}
+      colors={['#D9BA95', '#F5F5F5', '#F5F5F5', '#F5F5F5', '#E8D4B8', '#DBC2A3', '#D9BA95']}
+      locations={[0, 0.15, 0.5, 0.65, 0.75, 0.88, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -270,7 +322,7 @@ const GetStartedScreen = ({ route }) => {
               <Typography
                 weight="700"
                 size={28}
-                color={color.black_544B45}
+                color={color.brown_3C200A}
                 style={styles.title}
               >
                 Get Started
@@ -281,7 +333,7 @@ const GetStartedScreen = ({ route }) => {
                 color={color.grey_87807C}
                 style={styles.subtitle}
               >
-                Enter your details, it help us keep your account secure.
+                Enter your details, it helps us keep your account secure.
               </Typography>
             </View>
 
@@ -299,7 +351,30 @@ const GetStartedScreen = ({ route }) => {
                 validationSchema={validationSchema}
                 onSubmit={handleContinue}
               >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => {
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue, isValid }) => {
+                  // Trigger validation check when values change
+                  const valuesKey = JSON.stringify({ 
+                    fullName: values.fullName, 
+                    email: values.email, 
+                    phoneNumber: values.phoneNumber, 
+                    gender: values.gender,
+                    dateOfBirth: values.dateOfBirth || dateOfBirth,
+                    selectedGender: selectedGender
+                  });
+                  
+                  if (prevValuesRef.current.key !== valuesKey) {
+                    prevValuesRef.current.key = valuesKey;
+                    // Trigger validation check after render
+                    setTimeout(() => {
+                      if (formikRef.current) {
+                        formikRef.current.validateForm().then(() => {
+                          const { values: formValues, errors: formErrors } = formikRef.current;
+                          setIsFormValid(checkFormValidity(formValues, formErrors, dateOfBirth, selectedGender, isEmailLogin));
+                        });
+                      }
+                    }, 0);
+                  }
+
                   return (
                   <View style={styles.formContainer}>
                     {/* Full Name Field */}
@@ -335,7 +410,9 @@ const GetStartedScreen = ({ route }) => {
                           styles.dateInputText,
                           (values.dateOfBirth || dateOfBirth) ? styles.dateInputTextFilled : styles.dateInputTextPlaceholder
                         ]}>
-                          {values.dateOfBirth || dateOfBirth || 'Enter your Date of Birth'}
+                          {(values.dateOfBirth || dateOfBirth) 
+                            ? formatDateForDisplay(values.dateOfBirth || dateOfBirth)
+                            : 'Enter your Date of Birth'}
                         </Text>
                         <TouchableOpacity
                           onPress={() => {
@@ -343,7 +420,7 @@ const GetStartedScreen = ({ route }) => {
                           }}
                           style={styles.calendarIconButton}
                         >
-                          <Ionicons name="calendar-outline" size={20} color={color.grey_87807C} />
+                          <SvgIcons.calendarIcon width={18} height={18} />
                         </TouchableOpacity>
                       </View>
                       {touched.dateOfBirth && errors.dateOfBirth && (
@@ -439,7 +516,7 @@ const GetStartedScreen = ({ route }) => {
                         ]}>
                           {values.gender || selectedGender || 'Select your Gender'}
                         </Text>
-                        <SvgIcons.downArrow width={16} height={16} fill={color.grey_87807C} />
+                        <SvgIcons.arrowDown width={18} height={18} />
                       </TouchableOpacity>
                       {touched.gender && errors.gender && (
                         <Caption color={color.red_FF0000} style={styles.errorText}>
@@ -564,7 +641,7 @@ const GetStartedScreen = ({ route }) => {
                       onRequestClose={() => setShowGenderPicker(false)}
                     >
                       <TouchableOpacity
-                        style={styles.modalOverlay}
+                        style={styles.genderModalOverlay}
                         activeOpacity={1}
                         onPress={() => setShowGenderPicker(false)}
                       >
@@ -588,11 +665,11 @@ const GetStartedScreen = ({ route }) => {
                                   style={styles.genderOption}
                                   onPress={() => handleGenderSelect(gender, setFieldValue)}
                                 >
-                                  <View style={styles.genderRadio}>
+                                  {/* <View style={styles.genderRadio}>
                                     {(values.gender === gender || selectedGender === gender) && (
                                       <View style={styles.genderRadioSelected} />
                                     )}
-                                  </View>
+                                  </View> */}
                                   <Typography
                                     weight="400"
                                     size={16}
@@ -615,44 +692,26 @@ const GetStartedScreen = ({ route }) => {
           </ScrollView>
           
           {/* Continue Button - Fixed at bottom */}
-          <View style={styles.continueButtonContainer}>
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => {
-                if (formikRef.current) {
-                  formikRef.current.handleSubmit();
-                }
-              }}
-            >
-              <Typography
-                weight="600"
-                size={16}
-                color={color.white_FFFFFF}
+          {isFormValid && (
+            <View style={styles.continueButtonContainer}>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  if (formikRef.current) {
+                    formikRef.current.handleSubmit();
+                  }
+                }}
               >
-                Continue
-              </Typography>
-            </TouchableOpacity>
-          </View>
-          
-          {/* Continue Button - Fixed at bottom */}
-          <View style={styles.continueButtonContainer}>
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => {
-                if (formikRef.current) {
-                  formikRef.current.handleSubmit();
-                }
-              }}
-            >
-              <Typography
-                weight="600"
-                size={16}
-                color={color.white_FFFFFF}
-              >
-                Continue
-              </Typography>
-            </TouchableOpacity>
-          </View>
+                <Typography
+                  weight="600"
+                  size={16}
+                  color={color.white_FFFFFF}
+                >
+                  Continue
+                </Typography>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Country Code Picker Modal */}
           {!isEmailLogin && (
@@ -804,6 +863,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  continueButtonDisabled: {
+    backgroundColor: color.grey_E0E0E0,
+    opacity: 0.6,
+  },
   logoContainer: {
     alignItems: 'center',
     marginTop: 40,
@@ -829,6 +892,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
+  genderModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
   datePickerModal: {
     backgroundColor: color.white_FFFFFF,
     borderRadius: 20,
@@ -846,6 +914,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white_FFFFFF,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    width: '100%',
     paddingBottom: Platform.OS === 'ios' ? 30 : 20,
   },
   modalHandle: {
@@ -927,8 +996,8 @@ const styles = StyleSheet.create({
   genderOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomColor: color.black_544B45,
+    paddingVertical: 15,
+    borderBottomColor: color.borderBrown_CEBCA0,
   },
   genderRadio: {
     width: 16,

@@ -168,7 +168,7 @@ const LoginScreen = () => {
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <LinearGradient
-          colors={['#FFFFFF', '#F5F5F5', '#E8E0D6']}
+          colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ flex: 1 }}
@@ -185,21 +185,21 @@ const LoginScreen = () => {
               <View style={styles.headerSection}>
                 <Typography
                   weight="700"
-                  size={32}
-                  color={color.black_544B45}
+                  size={25}
+                  color={color.brown_3C200A}
                   style={styles.title}
                 >
                   Get Started
                 </Typography>
                 <Typography
                   weight="400"
-                  size={14}
+                  size={12}
                   color={color.grey_87807C}
                   style={styles.subtitle}
                 >
                   {inputType === 'phone'
-                    ? "We'll send you a code, it help us keep your account secure."
-                    : "We'll send you an OTP for confirmation, it help us keep your account secure."}
+                    ? "We'll send you a code, it helps us keep your account secure."
+                    : "We'll send you an OTP for confirmation, it helps us keep your account secure."}
                 </Typography>
               </View>
 
@@ -284,7 +284,7 @@ const LoginScreen = () => {
                       >
                         <Typography
                           weight="450"
-                          size={14}
+                          size={12}
                           color={color.brown_766F6A}
                         // style={styles.toggleButtonText}
                         >
@@ -305,16 +305,16 @@ const LoginScreen = () => {
                   <View style={styles.footerSection}>
                     <Typography
                       weight="450"
-                      size={14}
+                      size={12}
                       color={color.brown_766F6A}
                       style={styles.footerText}
                     >
                       By registering, you accept our{' '}
-                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                      <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                         Terms of Use
                       </Typography>
-                      {' '}and{' '}
-                      <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                      {' '}and{'\n'}{' '}
+                      <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                         Privacy Policy
                       </Typography>
                     </Typography>
@@ -360,7 +360,6 @@ const styles = StyleSheet.create({
   inputSection: {
     flex: 1,
     justifyContent: 'flex-start',
-    paddingTop: 20,
   },
   inputRow: {
     flexDirection: 'row',

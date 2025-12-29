@@ -92,9 +92,7 @@ const OtpLoginScreen = ({ route }) => {
   }
 
   const handleSignIn = async (otpArray) => {
-    navigation.navigate('GetStarted', {
-      user_identifier: userIdentifier
-    })
+    navigation.navigate('GetStarted')
     // const enteredOtp = otpArray.join('');
     // console.log('handleSignIn called with OTP:', enteredOtp);
     // if (enteredOtp.length === 5) {
@@ -279,7 +277,7 @@ const OtpLoginScreen = ({ route }) => {
   };
   return (
     <LinearGradient
-      colors={['#FFFFFF', '#F5F5F5', '#E8E0D6']}
+      colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -296,15 +294,15 @@ const OtpLoginScreen = ({ route }) => {
             <View style={styles.headerSection}>
               <Typography
                 weight="700"
-                size={28}
-                color={color.black_544B45}
+                size={25}
+                color={color.brown_3C200A}
                 style={styles.title}
               >
                 We've sent you an OTP
               </Typography>
               <Typography
                 weight="400"
-                size={14}
+                size={12}
                 color={color.grey_87807C}
                 style={styles.subtitle}
               >
@@ -342,7 +340,7 @@ const OtpLoginScreen = ({ route }) => {
                   <View style={styles.timerRow}>
                     <Typography
                       weight="400"
-                      size={14}
+                      size={12}
                       color={color.grey_87807C}
                     >
                       Resend{' '}
@@ -359,7 +357,7 @@ const OtpLoginScreen = ({ route }) => {
                   <TouchableOpacity style={styles.resendOtpButton} onPress={handleResendOtp}>
                     <Typography
                       weight="400"
-                      size={14}
+                      size={12}
                       color={color.grey_87807C}
                     >
                       Resend
@@ -369,7 +367,7 @@ const OtpLoginScreen = ({ route }) => {
                 <TouchableOpacity onPress={handleResendOtp}>
                   <Typography
                     weight="500"
-                    size={14}
+                    size={12}
                     color={color.brown_766F6A}
                     style={styles.tryAnotherWay}
                   >
@@ -399,16 +397,16 @@ const OtpLoginScreen = ({ route }) => {
                 <View style={styles.footerSection}>
                   <Typography
                     weight="450"
-                    size={14}
+                    size={12}
                     color={color.brown_766F6A}
                     style={styles.footerText}
                   >
                     By registering, you accept our{' '}
-                    <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                    <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                       Terms of Use
                     </Typography>
-                    {' '}and{' '}
-                    <Typography weight="600" size={14} color={color.brown_766F6A} style={styles.linkText}>
+                    {' '}and{'\n'}{' '}
+                    <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                       Privacy Policy
                     </Typography>
                   </Typography>
@@ -453,8 +451,8 @@ const OtpLoginScreen = ({ route }) => {
             >
               <View style={styles.modalContainer}>
                 <Typography
-                  weight="500"
-                  size={18}
+                  weight="700"
+                  size={15}
                   color={color.placeholderTxt_24282C}
                   style={styles.modalTitle}
                 >
@@ -469,7 +467,7 @@ const OtpLoginScreen = ({ route }) => {
                     <SvgIcons.whatsappBlackIcon width={24} height={24} />
                     <Typography
                       weight="400"
-                      size={14}
+                      size={13}
                       color={color.brown_766F6A}
                       style={styles.optionText}
                     >
@@ -486,7 +484,7 @@ const OtpLoginScreen = ({ route }) => {
                     <SvgIcons.smsBlackIcon width={24} height={24} />
                     <Typography
                       weight="400"
-                      size={14}
+                      size={13}
                       color={color.brown_766F6A}
                       style={styles.optionText}
                     >
@@ -504,7 +502,7 @@ const OtpLoginScreen = ({ route }) => {
                       <SvgIcons.emailBlackIcon width={24} height={24} />
                       <Typography
                         weight="400"
-                        size={14}
+                        size={13}
                         color={color.brown_766F6A}
                         style={styles.optionText}
                       >
@@ -563,6 +561,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: color.black_544B45,
     backgroundColor: color.white_FFFFFF,
+    fontWeight: '700',
   },
   otpInputError: {
     borderColor: color.red_FF3B30,
@@ -584,7 +583,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   tryAnotherWay: {
-    textDecorationLine: 'underline',
   },
   errorContainer: {
     flexDirection: 'row',
