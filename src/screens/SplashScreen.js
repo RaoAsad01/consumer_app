@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  SafeAreaView,
-  Text,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import SvgIcons from '../../components/SvgIcons';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
 
 const { width, height } = Dimensions.get('window');
@@ -48,21 +48,28 @@ const SplashScreenComponent = () => {
     }
   }, [isReady, navigation]);
 
-  const SplashImageIcon = SvgIcons.splashImageIcon;
+  const HexalloIcon = SvgIcons.hexalloSvg;
+  const ShadowGlowSplash = SvgIcons.shadowGlowSplash;
   const IllustrationSplashImage = SvgIcons.illustrationSplashImage;
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        style="light"
-        backgroundColor="#AE6F28"
-        translucent={false}
-      />
+       <StatusBar
+            style="light"
+            backgroundColor="transparent"
+            translucent
+            hidden={true}
+          />
       <SafeAreaView style={styles.safeArea}>
         {/* Top Section - Brown Background with Logo and Text */}
         <View style={styles.topSection}>
           <View style={styles.logoContainer}>
-            <SplashImageIcon />
+            <View style={styles.shadowGlowContainer}>
+              <ShadowGlowSplash width="100%" height="100%" />
+            </View>
+            <View style={styles.logoIconContainer}>
+              <HexalloIcon width={80} height={80} />
+            </View>
           </View>
           <Text style={styles.title}>Hexallo</Text>
           <Text style={styles.tagline}>Seamless Access Memorable Experiences</Text>
@@ -97,6 +104,25 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.1,
   },
   logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+    height: 200,
+  },
+  shadowGlowContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
+  logoIconContainer: {
+    position: 'relative',
+    zIndex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
