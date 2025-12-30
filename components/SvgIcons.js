@@ -2,9 +2,13 @@ import DashboardMenuIcon from '../assets//svgs/dashboard.svg';
 import LogoutMenuIcon from '../assets//svgs/logout-icon.svg';
 import ProfileIconActive from '../assets//svgs/profile_icon_active.svg';
 import AddIcon from '../assets/svgs/add_icon.svg';
+<<<<<<< HEAD
 import ArrowDown from '../assets/svgs/arrow-down.svg';
 import BackArrow from '../assets/svgs/back_arrow.svg';
 import CalendarIcon from '../assets/svgs/calendar-icon.svg';
+=======
+import BackArrow from '../assets/svgs/back_arrow.svg';
+>>>>>>> feature_authentication
 import CameraIconActive from '../assets/svgs/camera_icon_active.svg';
 import CameraIconInActive from '../assets/svgs/camera_icon_inactive.svg';
 import CardIconActive from '../assets/svgs/card_icon_active.svg';
@@ -47,6 +51,10 @@ import RemoveIcon from '../assets/svgs/remove_icon.svg';
 import RightArrowWhite from '../assets/svgs/right-arrow-white.svg';
 import ArrowRight from '../assets/svgs/right-arrow.svg';
 import SearchIcon from '../assets/svgs/search_icon.svg';
+<<<<<<< HEAD
+=======
+import ShadowGlowSplash from '../assets/svgs/shadow-glow-splash.svg';
+>>>>>>> feature_authentication
 import SmsBlackIcon from '../assets/svgs/sms-black-icon.svg';
 import SplashImageIcon from '../assets/svgs/splash_image_icon.svg';
 import SplashQrImg from '../assets/svgs/splash_qr_img.svg';
@@ -122,6 +130,10 @@ export default {
     emailBlackIcon: EmailBlackIcon,
     smsBlackIcon: SmsBlackIcon,
     whatsappBlackIcon: WhatsappBlackIcon,
+<<<<<<< HEAD
     calendarIcon: CalendarIcon,
     arrowDown: ArrowDown,
+=======
+    shadowGlowSplash: ShadowGlowSplash,
+>>>>>>> feature_authentication
 };

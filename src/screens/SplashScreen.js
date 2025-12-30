@@ -48,12 +48,17 @@ const SplashScreenComponent = () => {
     }
   }, [isReady, navigation]);
 
-  const SplashImageIcon = SvgIcons.splashImageIcon;
+  const HexalloIcon = SvgIcons.hexalloSvg;
+  const ShadowGlowSplash = SvgIcons.shadowGlowSplash;
   const IllustrationSplashImage = SvgIcons.illustrationSplashImage;
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <StatusBar
+=======
+       <StatusBar
+>>>>>>> feature_authentication
             style="light"
             backgroundColor="transparent"
             translucent
@@ -63,7 +68,12 @@ const SplashScreenComponent = () => {
         {/* Top Section - Brown Background with Logo and Text */}
         <View style={styles.topSection}>
           <View style={styles.logoContainer}>
-            <SplashImageIcon />
+            <View style={styles.shadowGlowContainer}>
+              <ShadowGlowSplash width="100%" height="100%" />
+            </View>
+            <View style={styles.logoIconContainer}>
+              <HexalloIcon width={80} height={80} />
+            </View>
           </View>
           <Text style={styles.title}>Hexallo</Text>
           <Text style={styles.tagline}>Seamless Access Memorable Experiences</Text>
@@ -98,6 +108,25 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.1,
   },
   logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+    height: 200,
+  },
+  shadowGlowContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 0,
+  },
+  logoIconContainer: {
+    position: 'relative',
+    zIndex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

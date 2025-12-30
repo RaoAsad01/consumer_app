@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -284,11 +283,7 @@ const OtpLoginScreen = ({ route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <StatusBar  style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true} />
-
+      
           <View style={styles.container}>
             {/* Header Section */}
             <View style={styles.headerSection}>
