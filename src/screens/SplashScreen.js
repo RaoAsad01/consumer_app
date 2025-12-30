@@ -54,11 +54,7 @@ const SplashScreenComponent = () => {
 
   return (
     <View style={styles.container}>
-<<<<<<< HEAD
-      <StatusBar
-=======
        <StatusBar
->>>>>>> feature_authentication
             style="light"
             backgroundColor="transparent"
             translucent

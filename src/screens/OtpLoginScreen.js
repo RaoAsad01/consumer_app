@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -283,7 +284,12 @@ const OtpLoginScreen = ({ route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-      
+        <StatusBar
+            style="light"
+            backgroundColor="transparent"
+            translucent
+            hidden={true}
+          />
           <View style={styles.container}>
             {/* Header Section */}
             <View style={styles.headerSection}>
@@ -342,10 +348,10 @@ const OtpLoginScreen = ({ route }) => {
                     </Typography>
                     <Typography
                       weight="400"
-                      size={14}
+                      size={12}
                       color={color.btnBrown_AE6F28}
                     >
-                      {formatTime(otpResendTime)}sec
+                      {formatTime(otpResendTime)} sec
                     </Typography>
                   </View>
                 ) : (
@@ -359,7 +365,7 @@ const OtpLoginScreen = ({ route }) => {
                     </Typography>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity onPress={handleResendOtp}>
+                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                   <Typography
                     weight="500"
                     size={12}

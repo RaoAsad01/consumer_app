@@ -2,13 +2,9 @@ import DashboardMenuIcon from '../assets//svgs/dashboard.svg';
 import LogoutMenuIcon from '../assets//svgs/logout-icon.svg';
 import ProfileIconActive from '../assets//svgs/profile_icon_active.svg';
 import AddIcon from '../assets/svgs/add_icon.svg';
-<<<<<<< HEAD
 import ArrowDown from '../assets/svgs/arrow-down.svg';
 import BackArrow from '../assets/svgs/back_arrow.svg';
 import CalendarIcon from '../assets/svgs/calendar-icon.svg';
-=======
-import BackArrow from '../assets/svgs/back_arrow.svg';
->>>>>>> feature_authentication
 import CameraIconActive from '../assets/svgs/camera_icon_active.svg';
 import CameraIconInActive from '../assets/svgs/camera_icon_inactive.svg';
 import CardIconActive from '../assets/svgs/card_icon_active.svg';
@@ -24,6 +20,7 @@ import DashboardInactiveIconWhite from '../assets/svgs/dashboard_inactive_icon_w
 import DownArrow from '../assets/svgs/downArrow.svg';
 import DownArrowWhite from '../assets/svgs/downarrow_white.svg';
 import EmailBlackIcon from '../assets/svgs/email-black-icon.svg';
+import ExploreBottomTabIcon from '../assets/svgs/explore-bottom-tab-icon.svg';
 import FilterIcon from '../assets/svgs/filter-icon.svg';
 import DrawerSVG from '../assets/svgs/hamburger-lg.svg';
 import HexalloSVG from '../assets/svgs/hexallo-icon.svg';
@@ -37,8 +34,11 @@ import IllustrationSplashImage from '../assets/svgs/Illustration_splash_image.sv
 import ManualActiveTabSVG from '../assets/svgs/manual_active_tab.svg';
 import ManualInActiveTabSVG from '../assets/svgs/manual_inactive_tab.svg';
 import ManualInActiveTabSVGWhite from '../assets/svgs/manual_inactive_tab_white.svg';
+import MarketplaceInactiveBottomIcon from '../assets/svgs/marketplace-inactive-bottom-icon.svg';
+import MobilityInactiveBottomIcon from '../assets/svgs/mobility-inactive-bottom-icon.svg';
 import MobMoneyIconActive from '../assets/svgs/mobmoney_icon_active.svg';
 import MobMoneyIconInActive from '../assets/svgs/mobmoney_icon_inactive.svg';
+import MoreInactiveBottomIcon from '../assets/svgs/more-inactive-bottom-icon.svg';
 import NoResultsIcon from '../assets/svgs/no-results-icon.svg';
 import OnboardingImage1 from '../assets/svgs/onboarding_image1.svg';
 import OnboardingImage2 from '../assets/svgs/onboarding_image2.svg';
@@ -51,10 +51,8 @@ import RemoveIcon from '../assets/svgs/remove_icon.svg';
 import RightArrowWhite from '../assets/svgs/right-arrow-white.svg';
 import ArrowRight from '../assets/svgs/right-arrow.svg';
 import SearchIcon from '../assets/svgs/search_icon.svg';
-<<<<<<< HEAD
-=======
+import ServicesInactiveBottomIcon from '../assets/svgs/services-inactive-bottom-icon.svg';
 import ShadowGlowSplash from '../assets/svgs/shadow-glow-splash.svg';
->>>>>>> feature_authentication
 import SmsBlackIcon from '../assets/svgs/sms-black-icon.svg';
 import SplashImageIcon from '../assets/svgs/splash_image_icon.svg';
 import SplashQrImg from '../assets/svgs/splash_qr_img.svg';
@@ -130,10 +128,12 @@ export default {
     emailBlackIcon: EmailBlackIcon,
     smsBlackIcon: SmsBlackIcon,
     whatsappBlackIcon: WhatsappBlackIcon,
-<<<<<<< HEAD
     calendarIcon: CalendarIcon,
     arrowDown: ArrowDown,
-=======
     shadowGlowSplash: ShadowGlowSplash,
->>>>>>> feature_authentication
+    exploreBottomTabIcon: ExploreBottomTabIcon,
+    servicesInactiveBottomIcon: ServicesInactiveBottomIcon,
+    mobilityInactiveBottomIcon: MobilityInactiveBottomIcon,
+    marketplaceInactiveBottomIcon: MarketplaceInactiveBottomIcon,
+    moreInactiveBottomIcon: MoreInactiveBottomIcon,
 };

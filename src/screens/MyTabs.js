@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import HomeScreen from './CheckIn';
-import Tickets from './Tickets';
-import ManualScan from './ManualScan';
-import { color } from '../color/color';
-import SvgIcons from '../../components/SvgIcons';
-import DashboardScreen from '../screens/dashboard';
-import ProfileScreen from './ProfileScreen';
 import { useRoute } from '@react-navigation/native';
-import { fetchUpdatedScanCount, updateEventInfoScanCount } from '../utils/scanCountUpdater';
-import { eventService } from '../api/apiService';
 import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useState } from 'react';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import SvgIcons from '../../components/SvgIcons';
+import { eventService } from '../api/apiService';
+import { color } from '../color/color';
+import Typography from '../components/Typography';
+import DashboardScreen from '../screens/dashboard';
+import { fetchUpdatedScanCount, updateEventInfoScanCount } from '../utils/scanCountUpdater';
+import HomeScreen from './CheckIn';
+import ManualScan from './ManualScan';
+import ProfileScreen from './ProfileScreen';
+import Tickets from './Tickets';
 
 const Tab = createBottomTabNavigator();
 
@@ -166,111 +167,91 @@ function MyTabs() {
     // because it depends on eventInfo?.eventUuid in the useEffect
   };
 
-  const CustomTabBarButton = ({ children, accessibilityState, onPress }) => {
-    return (
-      <TouchableOpacity
-        style={styles.tabBarButton}
-        onPress={onPress}
-        activeOpacity={1}
-      >
-        {children}
-      </TouchableOpacity>
-    );
+  // Tab mapping to new design
+  const tabMapping = {
+    'Dashboard': { label: 'Explore', icon: SvgIcons.exploreBottomTabIcon, inactiveIcon: SvgIcons.dashboardInactiveIcon },
+    'Tickets': { label: 'Services', icon: SvgIcons.ticketActiveTabSvg, inactiveIcon: SvgIcons.servicesInactiveBottomIcon },
+    'Check In': { label: 'Mobility', icon: SvgIcons.checkinActiveTabSVG, inactiveIcon: SvgIcons.mobilityInactiveBottomIcon },
+    'Manual': { label: 'Marketplace', icon: SvgIcons.manualActiveTabSVG, inactiveIcon: SvgIcons.marketplaceInactiveBottomIcon },
+    'Profile': { label: 'More', icon: SvgIcons.profileIconActive, inactiveIcon: SvgIcons.moreInactiveBottomIcon },
   };
 
-  const CustomIcon = ({ route, focused, isCheckInActive }) => {
-    let IconComponent;
+  const CustomTabBar = ({ state, descriptors, navigation }) => {
+    return (
+      <View style={styles.customTabBarContainer}>
+        {/* Brown Header Section */}
+        <View style={styles.tabBarHeader}>
+          <View style={styles.handleBar} />
+          <Typography
+            weight="600"
+            size={16}
+            color={color.btnTxt_FFF6DF}
+            style={styles.headerText}
+          >
+            Explore Categories
+          </Typography>
+        </View>
+        
+        {/* White Container with Tabs */}
+        <View style={styles.tabBarContent}>
+          {state.routes.map((route, index) => {
+            const { options } = descriptors[route.key];
+            const isFocused = state.index === index;
+            const tabInfo = tabMapping[route.name] || { label: route.name, icon: null, inactiveIcon: null };
 
-    if (route.name === 'Dashboard') {
-      if (isCheckInActive && !focused) {
-        IconComponent = focused ? SvgIcons.dashboardActiveIcon : SvgIcons.dashboardInactiveIcon;
-      } else {
-        IconComponent = focused ? SvgIcons.dashboardActiveIcon : SvgIcons.dashboardInactiveIcon;
-      }
-    } else if (route.name === 'Tickets') {
-      if (isCheckInActive && !focused) {
-        IconComponent = focused ? SvgIcons.ticketActiveTabSvg : SvgIcons.ticketInactiveTabSvg;
-      } else {
-        IconComponent = focused ? SvgIcons.ticketActiveTabSvg : SvgIcons.ticketInactiveTabSvg;
-      }
-    } else if (route.name === 'Check In') {
-      IconComponent = focused ? SvgIcons.checkinActiveTabSVG : SvgIcons.checkinInActiveTabSVG;
-    } else if (route.name === 'Manual') {
-      if (isCheckInActive && !focused) {
-        IconComponent = focused ? SvgIcons.manualActiveTabSVG : SvgIcons.manualInActiveTabSVG;
-      } else {
-        IconComponent = focused ? SvgIcons.manualActiveTabSVG : SvgIcons.manualInActiveTabSVG;
-      }
-    } else if (route.name === 'Profile') {
-      if (isCheckInActive && !focused) {
-        IconComponent = focused ? SvgIcons.profileIconActive : SvgIcons.profileIconInActive;
-      } else {
-        IconComponent = focused ? SvgIcons.profileIconActive : SvgIcons.profileIconInActive;
-      }
-    }
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
 
-    return <IconComponent width={24} height={24} fill="transparent" />;
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            };
+
+            const IconComponent = isFocused ? tabInfo.icon : tabInfo.inactiveIcon;
+
+            return (
+              <TouchableOpacity
+                key={route.key}
+                accessibilityRole="button"
+                accessibilityState={isFocused ? { selected: true } : {}}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+                testID={options.tabBarTestID}
+                onPress={onPress}
+                style={styles.tabItem}
+                activeOpacity={0.7}
+              >
+                {IconComponent && (
+                  <IconComponent 
+                    width={24} 
+                    height={24} 
+                    // fill={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                  />
+                )}
+                <Typography
+                  weight={isFocused ? "600" : "400"}
+                  size={12}
+                  color={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                  style={styles.tabLabel}
+                >
+                  {tabInfo.label}
+                </Typography>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    );
   };
 
   return (
     <Tab.Navigator
-      screenOptions={({ route, navigation }) => {
-        const state = navigation.getState();
-        const currentRoute = state.routes[state.index];
-        const isCheckInActive = currentRoute?.name === 'Check In';
-
-        return {
-          tabBarIcon: ({ focused }) => {
-            const icon = (
-              <CustomIcon
-                route={route}
-                focused={focused}
-                isCheckInActive={isCheckInActive}
-              />
-            );
-
-            const label = (
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={[
-                  styles.tabBarLabel,
-                  {
-                    color: focused
-                      ? '#AE6F28'
-                      : isCheckInActive
-                        ? '#766F6A'
-                        : color.brown_766F6A,
-                    fontWeight: focused ? 'bold' : 'normal',
-                  },
-                ]}
-              >
-                {route.name}
-              </Text>
-            );
-
-            return (
-              <View
-                style={[
-                  styles.iconLabelWrapper,
-                  focused && styles.focusedTabWrapper,
-                ]}
-              >
-                {icon}
-                {label}
-              </View>
-            );
-          },
-
-          tabBarStyle: {
-            height: 66,
-            backgroundColor: isCheckInActive ? '#f3f3f3' : '#f3f3f3',
-          },
-          tabBarShowLabel: false,
-          tabBarButton: (props) => (
-            <CustomTabBarButton {...props} route={route} />
-          ),
-        };
+      tabBar={(props) => <CustomTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
       }}
       initialRouteName="Dashboard"
     >
@@ -356,29 +337,59 @@ function MyTabs() {
 }
 
 const styles = StyleSheet.create({
-  tabBarButton: {
+  customTabBarContainer: {
+    backgroundColor: color.btnBrown_AE6F28,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  tabBarHeader: {
+    backgroundColor: color.btnBrown_AE6F28,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  handleBar: {
+    width: 40,
+    height: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  headerText: {
+    textAlign: 'center',
+  },
+  tabBarContent: {
+    flexDirection: 'row',
+    backgroundColor: color.white_FFFFFF,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 12,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  tabItem: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  iconLabelWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 72,
     paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderRadius: 5,
   },
-
-  focusedTabWrapper: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 6,
-    marginVertical: -10
-  },
-
-  tabBarLabel: {
-    fontSize: 10,
+  tabLabel: {
     marginTop: 4,
     textAlign: 'center',
   },

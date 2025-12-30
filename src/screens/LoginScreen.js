@@ -175,9 +175,9 @@ const LoginScreen = () => {
         >
           <StatusBar
             style="light"
-            backgroundColor="black"
+            backgroundColor="transparent"
             translucent
-            hidden={false}
+            hidden={true}
           />
           <View style={styles.container}>
             <View style={styles.contentWrapper}>
@@ -460,13 +460,14 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: 'center',
     lineHeight: 18,
+    marginBottom: 50,
   },
   linkText: {
     textDecorationLine: 'underline',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 50,
   },
 });
 

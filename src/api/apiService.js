@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // Base URL configuration
-const BASE_URL = 'https://d1-api.hexallo.com/';
+const BASE_URL = 'https://t1-api.hexallo.com/';
 //for dev orgainer const BASE_URL = 'https://d1-api.hexallo.com/';
 //for dev admin  const BASE_URL = 'https://d1-admin.hexallo.com/';
 //for prod orgainer const BASE_URL = 'https://t1-api.hexallo.com/';
@@ -86,6 +86,8 @@ const endpoints = {
   logout: '/api/logout/',
   updateProfile: '/api/profile/',
   adminDashboardTerminals: '/events/terminals/',
+  //Consumer API endpoints
+  signup: '/api/signup/',
 };
 
 // API services
@@ -94,7 +96,7 @@ export const authService = {
   requestOtp: async (data) => {
     try {
       const response = await apiClient.post(endpoints.otpRequest, data);
-      console.log('API Response:', response.data);
+      console.log('Consumer API Response:', response.data);
 
       if (!response.data) {
         throw new Error('No data received from server');

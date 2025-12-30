@@ -132,7 +132,7 @@ const GetStartedScreen = ({ route }) => {
 
   const validationSchema = Yup.object().shape({
     fullName: Yup.string()
-      .min(2, 'Full name must be at least 2 characters')
+      // .min(2, 'Full name must be at least 2 characters')
       .required('Full name is required'),
     dateOfBirth: Yup.string()
       .required('Date of birth is required'),
@@ -285,13 +285,11 @@ const GetStartedScreen = ({ route }) => {
   };
 
   const handleContinue = async (values) => {
-    // // TODO: Handle form submission - navigate to next screen or submit to API
-    // console.log('Form values:', values);
-    // // For now, navigate to LoggedIn screen
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'LoggedIn' }],
-    // });
+    // Navigate to home screen (Explore/Dashboard)
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoggedIn' }],
+    });
   };
 
   const genders = ['Male', 'Female', 'Other'];
