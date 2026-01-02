@@ -40,7 +40,7 @@ const OtpLoginScreen = ({ route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const inputRefs = useRef([]);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const uuid = route?.params?.uuid;
+  const [uuid, setUuid] = useState(route?.params?.uuid);
   const userIdentifier = route?.params?.user_identifier;
   const [errorMessage, setErrorMessage] = useState('');
   const [showError, setShowError] = useState(false);
@@ -92,110 +92,45 @@ const OtpLoginScreen = ({ route }) => {
   }
 
   const handleSignIn = async (otpArray) => {
-    navigation.navigate('GetStarted')
-    // const enteredOtp = otpArray.join('');
-    // console.log('handleSignIn called with OTP:', enteredOtp);
-    // if (enteredOtp.length === 5) {
-    //   setLoading(true);
-    //   try {
-    //     const payload = {
-    //       uuid: uuid,
-    //       otp: enteredOtp
-    //     };
-    //     const response = await authService.verifyOtp(payload);
-    //     console.log('OTP verify response:', response);
-    //     if (response.success && response.data && response.data.access_token) {
-    //       setShowError(false);
-    //       setErrorMessage('');
-    //       setLoading(false);
-    //       // Store the access token
-    //       await SecureStore.setItemAsync('accessToken', response.data.access_token);
-    //       // Fetch staff events
-    //       const staffEventsData = await eventService.fetchStaffEvents();
-    //       console.log('Staff events data structure:', JSON.stringify(staffEventsData, null, 2));
-    //       const eventsList = staffEventsData?.data;
-    //       console.log('Events list:', eventsList);
+    const enteredOtp = otpArray.join('');
+    console.log('handleSignIn called with OTP:', enteredOtp);
+    if (enteredOtp.length === 5) {
+      setLoading(true);
+      try {
+        const payload = {
+          uuid: uuid,
+          otp: enteredOtp,
+          role: 'CUSTOMER'
+        };
+        const response = await authService.verifyOtp(payload);
+        console.log('OTP verify response:', response);
+        if (response && response.success === true) {
+          setShowError(false);
+          setErrorMessage('');
+          setLoading(false);
 
-    //       // Handle different data structures for ADMIN vs Organizer roles
-    //       let selectedEvent = null;
-
-    //       if (eventsList && eventsList.length > 0) {
-    //         // For organizer role: eventsList[0] contains {events: [...], staff: "..."}
-    //         if (eventsList[0].events && Array.isArray(eventsList[0].events)) {
-    //           console.log('Organizer role detected - events array found');
-    //           console.log('Events array:', eventsList[0].events);
-    //           if (eventsList[0].events.length > 0) {
-    //             selectedEvent = eventsList[0].events[0];
-    //             console.log('Selected event from organizer role:', selectedEvent);
-    //           }
-    //         } else {
-    //           // For admin role or direct event structure
-    //           console.log('Admin role or direct event structure detected');
-    //           selectedEvent = eventsList[0];
-    //           console.log('Selected event from admin role:', selectedEvent);
-    //         }
-    //       }
-
-    //       if (selectedEvent) {
-    //         const eventUuid = selectedEvent.uuid || selectedEvent.eventUuid;
-    //         console.log('Selected event UUID:', eventUuid);
-
-    //         try {
-    //           // Fetch event info
-    //           const eventInfoData = await eventService.fetchEventInfo(eventUuid);
-
-    //           // Store the selected event UUID for app restart scenarios
-    //           await SecureStore.setItemAsync('lastSelectedEventUuid', eventUuid);
-    //           console.log('Stored last selected event UUID:', eventUuid);
-
-    //           // Verify the storage worked
-    //           const storedUuid = await SecureStore.getItemAsync('lastSelectedEventUuid');
-    //           console.log('Verified stored UUID:', storedUuid);
-
-    //           navigation.navigate('GetStarted', {
-    //             user_identifier: userIdentifier
-    //           });
-    //         } catch (eventError) {
-    //           console.error('Error fetching event info:', eventError);
-
-    //           // Handle business logic errors gracefully
-    //           if (eventError.isBusinessError) {
-    //             console.log('Business logic error - proceeding without event data');
-    //             // Navigate to GetStarted screen
-    //             navigation.navigate('GetStarted', {
-    //               user_identifier: userIdentifier
-    //             });
-    //           } else {
-    //             // For other errors, show error message but still navigate
-    //             setErrorMessage('Unable to load event details. Please try again later.');
-    //             setShowError(true);
-    //             setLoading(false);
-    //             setTimeout(() => {
-    //               navigation.reset({
-    //                 index: 0,
-    //                 routes: [{ name: 'LoggedIn' }],
-    //               });
-    //             }, 2000);
-    //           }
-    //         }
-    //       } else {
-    //         console.log('No events found - proceeding to GetStarted');
-    //         navigation.navigate('GetStarted', {
-    //           user_identifier: userIdentifier
-    //         });
-    //       }
-    //     } else {
-    //       setErrorMessage('You have entered an invalid OTP');
-    //       setShowError(true);
-    //       setLoading(false);
-    //     }
-    //   } catch (error) {
-    //     setErrorMessage('You have entered an invalid OTP');
-    //     setShowError(true);
-    //     setLoading(false);
-    //     console.log('OTP Verification Error:', error);
-    //   }
-    // }
+          // Navigate to GetStarted screen on successful OTP verification
+          navigation.navigate('GetStarted', {
+            user_identifier: userIdentifier
+          });
+        } else {
+          const errorMessage = response?.message || 'You have entered an invalid OTP';
+          setErrorMessage(errorMessage);
+          setShowError(true);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log('OTP Verification Error:', error);
+        // Extract error message from error object
+        const errorMessage = error?.message ||
+          error?.response?.data?.message ||
+          error?.response?.data?.data?.non_field_errors?.[0] ||
+          'You have entered an invalid OTP';
+        setErrorMessage(errorMessage);
+        setShowError(true);
+        setLoading(false);
+      }
+    }
   };
 
   const handleResendOtp = async () => {
@@ -284,7 +219,7 @@ const OtpLoginScreen = ({ route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-        <StatusBar
+          <StatusBar
             style="light"
             backgroundColor="transparent"
             translucent
@@ -377,15 +312,15 @@ const OtpLoginScreen = ({ route }) => {
                 </TouchableOpacity>
               </View>
               {showError && (
-              <View style={styles.errorContainer}>
-                <TouchableOpacity onPress={dismissError}>
-                  <SvgIcons.crossIconRed width={20} height={20} fill={color.red_FF3B30} />
-                </TouchableOpacity>
-                <Typography weight="400" size={14} color={color.red_EF3E32} style={styles.errorText}>
-                  {errorMessage}
-                </Typography>
-              </View>
-            )}
+                <View style={styles.errorContainer}>
+                  <TouchableOpacity onPress={dismissError}>
+                    <SvgIcons.crossIconRed width={20} height={20} fill={color.red_FF3B30} />
+                  </TouchableOpacity>
+                  <Typography weight="400" size={14} color={color.red_EF3E32} style={styles.errorText}>
+                    {errorMessage}
+                  </Typography>
+                </View>
+              )}
             </View>
 
 

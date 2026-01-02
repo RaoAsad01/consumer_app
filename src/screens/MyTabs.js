@@ -7,7 +7,7 @@ import SvgIcons from '../../components/SvgIcons';
 import { eventService } from '../api/apiService';
 import { color } from '../color/color';
 import Typography from '../components/Typography';
-import DashboardScreen from '../screens/dashboard';
+import ExploreCategories from '../screens/ExploreCategories';
 import { fetchUpdatedScanCount, updateEventInfoScanCount } from '../utils/scanCountUpdater';
 import HomeScreen from './CheckIn';
 import ManualScan from './ManualScan';
@@ -265,7 +265,7 @@ function MyTabs() {
           statusBarTranslucent: false
         }}
       >
-        {() => <DashboardScreen eventInfo={eventInformation} onScanCountUpdate={updateScanCount} onEventChange={handleEventChange} />}
+        {() => <ExploreCategories />}
       </Tab.Screen>
 
       <Tab.Screen
