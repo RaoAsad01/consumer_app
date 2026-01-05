@@ -82,37 +82,25 @@ const ExploreCategories = () => {
 
   return (
     <View style={styles.container}>
-      {/* Scrollable Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      {/* Categories Grid */}
         <View style={styles.categoriesGrid}>
           {categories.map((item, index) => renderCategoryItem(item, index))}
         </View>
-      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '100%',
     backgroundColor: '#F5F5F5',
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
   },
   categoriesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    padding: 20,
+    paddingBottom: 40,
   },
   categoryButton: {
     width: CATEGORY_SIZE,

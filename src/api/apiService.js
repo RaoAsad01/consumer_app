@@ -130,11 +130,24 @@ export const authService = {
   verifyOtp: async (data) => {
     try {
       const response = await apiClient.post(endpoints.verifyOtp, data);
-      console.log('API Response (Verify OTP):', response.data);
-      if (response.data?.access_token) {
-        await SecureStore.setItemAsync('accessToken', response.data.access_token);
+      console.log('API Response (Verify OTP):', JSON.stringify(response.data, null, 2));
+      
+      // Try different possible locations for the access token
+      const accessToken = response.data?.access_token || 
+                         response.data?.data?.access_token ||
+                         response.data?.token;
+      
+      if (accessToken) {
+        await SecureStore.setItemAsync('accessToken', accessToken);
         console.log('Token stored successfully');
+        
+        // Verify token was stored
+        const storedToken = await SecureStore.getItemAsync('accessToken');
+        console.log('Token verification - stored:', storedToken ? 'Yes' : 'No');
+      } else {
+        console.warn('No access token found in response:', response.data);
       }
+      
       return response.data;
     } catch (error) {
       console.error('OTP Error:', {
@@ -762,6 +775,59 @@ export const userService = {
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
+    }
+  },
+
+  updateProfileJson: async (profileData) => {
+    try {
+      // Create FormData object for multipart/form-data
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      if (profileData.first_name) {
+        formData.append('first_name', profileData.first_name);
+      }
+      if (profileData.last_name) {
+        formData.append('last_name', profileData.last_name);
+      }
+      if (profileData.email) {
+        formData.append('email', profileData.email);
+      }
+      if (profileData.phone_number) {
+        formData.append('phone_number', profileData.phone_number);
+      }
+      if (profileData.date_of_birth) {
+        formData.append('date_of_birth', profileData.date_of_birth);
+      }
+      if (profileData.gender) {
+        formData.append('gender', profileData.gender);
+      }
+      
+      console.log("Profile update FormData:", formData);
+      
+      const response = await apiClient.patch(endpoints.updateProfile, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log("Profile update response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Update Profile Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      if (error.response?.data) {
+        throw {
+          message: error.response.data.message || 'Failed to update profile.',
+          response: error.response
+        };
+      }
+      throw {
+        message: 'Network error. Please check your connection.',
+        error: error
+      };
     }
   },
 

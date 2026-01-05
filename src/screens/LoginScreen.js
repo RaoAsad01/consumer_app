@@ -307,13 +307,21 @@ const LoginScreen = () => {
                       weight="450"
                       size={12}
                       color={color.brown_766F6A}
+                      style={styles.footerTextHexallo}
+                    >
+                      By Hexallo Enterprise
+                    </Typography>
+                    <Typography
+                      weight="450"
+                      size={12}
+                      color={color.brown_766F6A}
                       style={styles.footerText}
                     >
-                      By registering, you accept our{' '}
+                      By getting started, you accept{' '}
                       <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                         Terms of Use
                       </Typography>
-                      {' '}and{'\n'}{' '}
+                      {' '}{'\n'}{' '}and{' '}
                       <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                         Privacy Policy
                       </Typography>
@@ -456,6 +464,9 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingTop: 20,
     paddingHorizontal: 16,
+  },
+  footerTextHexallo: {
+    marginBottom: 10,
   },
   footerText: {
     textAlign: 'center',

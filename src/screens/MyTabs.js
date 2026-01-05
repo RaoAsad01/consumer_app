@@ -2,7 +2,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useRoute } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
+import Animated, {
+  runOnJS,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
+} from 'react-native-reanimated';
 import SvgIcons from '../../components/SvgIcons';
 import { eventService } from '../api/apiService';
 import { color } from '../color/color';
@@ -10,9 +18,14 @@ import Typography from '../components/Typography';
 import ExploreCategories from '../screens/ExploreCategories';
 import { fetchUpdatedScanCount, updateEventInfoScanCount } from '../utils/scanCountUpdater';
 import HomeScreen from './CheckIn';
+import ConsumerHomeScreen from './HomeScreen';
 import ManualScan from './ManualScan';
 import ProfileScreen from './ProfileScreen';
 import Tickets from './Tickets';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const COLLAPSED_HEIGHT = 120; // Height when collapsed (header + tabs)
+const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.7; // Height when expanded
 
 const Tab = createBottomTabNavigator();
 
@@ -177,73 +190,151 @@ function MyTabs() {
   };
 
   const CustomTabBar = ({ state, descriptors, navigation }) => {
-    return (
-      <View style={styles.customTabBarContainer}>
-        {/* Brown Header Section */}
-        <View style={styles.tabBarHeader}>
-          <View style={styles.handleBar} />
-          <Typography
-            weight="600"
-            size={16}
-            color={color.btnTxt_FFF6DF}
-            style={styles.headerText}
-          >
-            Explore Categories
-          </Typography>
-        </View>
+    const [isExpanded, setIsExpanded] = useState(false);
+    const containerHeight = useSharedValue(COLLAPSED_HEIGHT);
+
+    const toggleExpanded = () => {
+      const newExpanded = !isExpanded;
+      setIsExpanded(newExpanded);
+      containerHeight.value = withSpring(newExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT, {
+        damping: 20,
+        stiffness: 90,
+      });
+    };
+
+    const gestureHandler = useAnimatedGestureHandler({
+      onStart: (_, ctx) => {
+        ctx.startY = containerHeight.value;
+      },
+      onActive: (event, ctx) => {
+        const newHeight = ctx.startY - event.translationY;
         
-        {/* White Container with Tabs */}
-        <View style={styles.tabBarContent}>
-          {state.routes.map((route, index) => {
-            const { options } = descriptors[route.key];
-            const isFocused = state.index === index;
-            const tabInfo = tabMapping[route.name] || { label: route.name, icon: null, inactiveIcon: null };
+        if (isExpanded) {
+          // When expanded, allow dragging down to collapse
+          if (event.translationY > 0) {
+            containerHeight.value = Math.max(COLLAPSED_HEIGHT, newHeight);
+          }
+        } else {
+          // When collapsed, allow dragging up to expand
+          if (event.translationY < 0) {
+            containerHeight.value = Math.min(EXPANDED_HEIGHT, newHeight);
+          }
+        }
+      },
+      onEnd: (event) => {
+        const threshold = (EXPANDED_HEIGHT + COLLAPSED_HEIGHT) / 2;
+        
+        if (containerHeight.value > threshold) {
+          // Expand
+          containerHeight.value = withSpring(EXPANDED_HEIGHT, {
+            damping: 20,
+            stiffness: 90,
+          });
+          runOnJS(setIsExpanded)(true);
+        } else {
+          // Collapse
+          containerHeight.value = withSpring(COLLAPSED_HEIGHT, {
+            damping: 20,
+            stiffness: 90,
+          });
+          runOnJS(setIsExpanded)(false);
+        }
+      },
+    });
 
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
+    const animatedContainerStyle = useAnimatedStyle(() => {
+      return {
+        height: containerHeight.value,
+      };
+    });
 
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            };
-
-            const IconComponent = isFocused ? tabInfo.icon : tabInfo.inactiveIcon;
-
-            return (
-              <TouchableOpacity
-                key={route.key}
-                accessibilityRole="button"
-                accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={options.tabBarAccessibilityLabel}
-                testID={options.tabBarTestID}
-                onPress={onPress}
-                style={styles.tabItem}
-                activeOpacity={0.7}
+    return (
+      <GestureHandlerRootView style={styles.gestureContainer}>
+        <PanGestureHandler onGestureEvent={gestureHandler}>
+          <Animated.View style={[styles.customTabBarContainer, animatedContainerStyle]}>
+            {/* Brown Header Section - Touchable to toggle */}
+            <TouchableOpacity
+              style={styles.tabBarHeader}
+              onPress={toggleExpanded}
+              activeOpacity={0.8}
+            >
+              <View style={styles.handleBar} />
+              <Typography
+                weight="600"
+                size={16}
+                color={color.btnTxt_FFF6DF}
+                style={styles.headerText}
               >
-                {IconComponent && (
-                  <IconComponent 
-                    width={24} 
-                    height={24} 
-                    // fill={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
-                  />
-                )}
-                <Typography
-                  weight={isFocused ? "600" : "400"}
-                  size={12}
-                  color={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
-                  style={styles.tabLabel}
-                >
-                  {tabInfo.label}
-                </Typography>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+                Explore Categories
+              </Typography>
+            </TouchableOpacity>
+            
+            {/* Scrollable Categories Section - Only visible when expanded */}
+            {isExpanded && (
+              <ScrollView
+                style={styles.categoriesScrollView}
+                contentContainerStyle={styles.categoriesScrollContent}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}
+              >
+                <ExploreCategories />
+              </ScrollView>
+            )}
+            
+            {/* White Container with Tabs */}
+            <View style={styles.tabBarContent}>
+              {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const isFocused = state.index === index;
+                const tabInfo = tabMapping[route.name] || { label: route.name, icon: null, inactiveIcon: null };
+
+                const onPress = () => {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: route.key,
+                    canPreventDefault: true,
+                  });
+
+                  if (!isFocused && !event.defaultPrevented) {
+                    navigation.navigate(route.name);
+                  }
+                };
+
+                const IconComponent = isFocused ? tabInfo.icon : tabInfo.inactiveIcon;
+
+                return (
+                  <TouchableOpacity
+                    key={route.key}
+                    accessibilityRole="button"
+                    accessibilityState={isFocused ? { selected: true } : {}}
+                    accessibilityLabel={options.tabBarAccessibilityLabel}
+                    testID={options.tabBarTestID}
+                    onPress={onPress}
+                    style={styles.tabItem}
+                    activeOpacity={0.7}
+                  >
+                    {IconComponent && (
+                      <IconComponent 
+                        width={24} 
+                        height={24} 
+                        // fill={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                      />
+                    )}
+                    <Typography
+                      weight={isFocused ? "600" : "400"}
+                      size={12}
+                      color={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                      style={styles.tabLabel}
+                    >
+                      {tabInfo.label}
+                    </Typography>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </Animated.View>
+        </PanGestureHandler>
+      </GestureHandlerRootView>
     );
   };
 
@@ -265,7 +356,7 @@ function MyTabs() {
           statusBarTranslucent: false
         }}
       >
-        {() => <ExploreCategories />}
+        {() => <ConsumerHomeScreen />}
       </Tab.Screen>
 
       <Tab.Screen
@@ -337,10 +428,17 @@ function MyTabs() {
 }
 
 const styles = StyleSheet.create({
+  gestureContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
   customTabBarContainer: {
     backgroundColor: color.btnBrown_AE6F28,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -371,6 +469,13 @@ const styles = StyleSheet.create({
   },
   headerText: {
     textAlign: 'center',
+  },
+  categoriesScrollView: {
+    maxHeight: 500,
+    backgroundColor: '#F5F5F5',
+  },
+  categoriesScrollContent: {
+    paddingBottom: 20,
   },
   tabBarContent: {
     flexDirection: 'row',

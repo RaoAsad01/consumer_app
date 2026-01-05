@@ -29,13 +29,13 @@ const OnboardingScreen = () => {
   const onboardingData = [
     {
       id: 1,
-      title: 'Discover & Book instantly.',
+      title: 'Discover & Book instantly',
       subtitle: 'One stop for all your experiences and plans',
     },
     {
       id: 2,
-      title: 'Discover & Book instantly.',
-      subtitle: 'One stop for all your experiences and plans',
+      title: 'Discover more to do more',
+      subtitle: 'find more services that simply everyday life',
     },
   ];
 
