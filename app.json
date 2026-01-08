@@ -38,7 +38,8 @@
       "targetSdkVersion": 35,
       "enableProguardInReleaseBuilds": true,
       "enableShrinkResources": true,
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "bundler": "metro",

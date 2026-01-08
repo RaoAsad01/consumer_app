@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import {
@@ -23,14 +22,16 @@ import Typography, { Caption } from '../components/Typography';
 import { defaultCountryCode } from '../constants/countryCodes';
 import { getAutoDetectedCountry } from '../utils/countryDetection';
 
-const LoginScreen = () => {
+const LoginScreen = ({ route }) => {
   const navigation = useNavigation();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showError, setShowError] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(defaultCountryCode);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [inputType, setInputType] = useState('phone'); // Start with 'phone' as default
+  // Set initial input type from route params, default to 'phone'
+  const initialInputType = route?.params?.inputType || 'phone';
+  const [inputType, setInputType] = useState(initialInputType);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [slideAnim] = useState(new Animated.Value(0));
   const [isDetectingCountry, setIsDetectingCountry] = useState(false);
@@ -173,12 +174,6 @@ const LoginScreen = () => {
           end={{ x: 1, y: 1 }}
           style={{ flex: 1 }}
         >
-          <StatusBar
-            style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true}
-          />
           <View style={styles.container}>
             <View style={styles.contentWrapper}>
               {/* Header Section */}
@@ -471,14 +466,13 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 50,
   },
   linkText: {
     textDecorationLine: 'underline',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 50,
+    marginBottom: 30,
   },
 });
 

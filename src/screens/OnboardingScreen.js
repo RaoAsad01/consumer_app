@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
+import * as NavigationBar from 'expo-navigation-bar';
 import * as SecureStore from 'expo-secure-store';
-import { StatusBar } from 'expo-status-bar';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   FlatList,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -25,6 +26,14 @@ const OnboardingScreen = () => {
   const flatListRef = useRef(null);
   const scrollStartX = useRef(0);
   const isNavigating = useRef(false);
+
+  useEffect(() => {
+    // Set navigation bar color for Onboarding screen
+    if (Platform.OS === 'android') {
+      NavigationBar.setBackgroundColorAsync('#F2C86C');
+      NavigationBar.setButtonStyleAsync('dark');
+    }
+  }, []);
 
   const onboardingData = [
     {
@@ -163,12 +172,7 @@ const OnboardingScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-            style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true}
-          />
+    
       <SafeAreaView style={styles.safeArea}>
         {/* Progress Bar */}
         <View style={[styles.progressBarContainer, { paddingTop: insets.top + 40 }]}>
@@ -274,7 +278,7 @@ const styles = StyleSheet.create({
   },
   /* SVG Section */
   bottomSection: {
-    flex: 0.75,
+    flex: 0.67,
     width,   
     overflow: 'hidden',
   },

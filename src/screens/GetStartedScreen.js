@@ -2,11 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
-import { StatusBar } from 'expo-status-bar';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Dimensions,
   Keyboard,
   Modal,
@@ -26,6 +24,7 @@ import { color } from '../color/color';
 import CountryCodePicker from '../components/CountryCodePicker';
 import Typography, { Caption } from '../components/Typography';
 import { defaultCountryCode } from '../constants/countryCodes';
+import OtpErrorPopup from '../constants/OtpErrorPopup';
 import { getAutoDetectedCountry } from '../utils/countryDetection';
 
 // Helper function to detect if user identifier is email or phone
@@ -49,6 +48,8 @@ const GetStartedScreen = ({ route }) => {
   const [selectedGender, setSelectedGender] = useState('');
   const [isFormValid, setIsFormValid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorPopupMessage, setErrorPopupMessage] = useState('');
   const formikRef = React.useRef(null);
   const prevValuesRef = React.useRef({});
 
@@ -64,13 +65,19 @@ const GetStartedScreen = ({ route }) => {
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
-  const isEmailLogin = userIdentifier ? isEmail(userIdentifier) : false;
+  // Show opposite field: if user logged in with email, show phone field; if phone, show email field
+  // Check if the userIdentifier is an email (contains @ symbol)
+  const userLoggedInWithEmail = userIdentifier ? isEmail(userIdentifier) : false;
+  // Show the opposite: if logged in with email, show phone field (isEmailLogin = false)
+  // if logged in with phone, show email field (isEmailLogin = true)
+  const isEmailLogin = !userLoggedInWithEmail;
 
   // Debug logging
   useEffect(() => {
     console.log('GetStartedScreen - userIdentifier:', userIdentifier);
-    console.log('GetStartedScreen - isEmailLogin:', isEmailLogin);
-  }, [userIdentifier, isEmailLogin]);
+    console.log('GetStartedScreen - userLoggedInWithEmail:', userLoggedInWithEmail);
+    console.log('GetStartedScreen - isEmailLogin (show email field?):', isEmailLogin);
+  }, [userIdentifier, userLoggedInWithEmail, isEmailLogin]);
 
   const { height: screenHeight } = Dimensions.get('window');
   const isSmallScreen = screenHeight < 700;
@@ -115,7 +122,9 @@ const GetStartedScreen = ({ route }) => {
 
   // Helper function to check form validity
   const checkFormValidity = (formValues, formErrors, currentDateOfBirth, currentSelectedGender, currentIsEmailLogin) => {
-    const hasFullName = formValues?.fullName && formValues.fullName.trim().length >= 2;
+    const fullName = formValues?.fullName?.trim() || '';
+    const nameParts = fullName.split(/\s+/).filter(part => part.length > 0);
+    const hasFullName = nameParts.length >= 2 && nameParts.every(part => part.length >= 2);
     const hasDateOfBirth = formValues?.dateOfBirth || currentDateOfBirth;
     const hasEmail = currentIsEmailLogin ? (formValues?.email && formValues.email.trim().length > 0) : true;
     const hasPhoneNumber = !currentIsEmailLogin ? (formValues?.phoneNumber && formValues.phoneNumber.trim().length >= 7) : true;
@@ -145,7 +154,12 @@ const GetStartedScreen = ({ route }) => {
 
   const validationSchema = Yup.object().shape({
     fullName: Yup.string()
-      .min(2, 'Full name must be at least 2 characters')
+      .trim()
+      .test('has-first-last-name', 'Please enter first and last name', (value) => {
+        if (!value) return false;
+        const nameParts = value.trim().split(/\s+/).filter(part => part.length > 0);
+        return nameParts.length >= 2 && nameParts.every(part => part.length >= 2);
+      })
       .required('Full name is required'),
     dateOfBirth: Yup.string()
       .required('Date of birth is required'),
@@ -350,31 +364,26 @@ const GetStartedScreen = ({ route }) => {
       const token = await SecureStore.getItemAsync('accessToken');
       if (!token) {
         console.error('No access token found. User needs to login again.');
-        Alert.alert(
-          'Authentication Error',
-          'Please login again to continue.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Login' }],
-                });
-              }
-            }
-          ]
-        );
+        setErrorPopupMessage('Please login again to continue.');
+        setShowErrorPopup(true);
+        // Navigate to login after a delay
+        setTimeout(() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+        }, 2000);
         setIsSubmitting(false);
         return;
       }
 
       console.log('Token found, proceeding with profile update');
 
-      // Split full name into first and last name
-      const nameParts = values.fullName.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+      // Backend expects a single 'name' field (not first_name and last_name)
+      // Backend behavior: If the name contains a space, the last part is treated as the last name
+      // Example: "Ali Awan" -> first_name: "Ali", last_name: "Awan"
+      // Example: "John Michael Smith" -> first_name: "John", last_name: "Michael Smith"
+      const fullName = values.fullName.trim();
 
       // Convert date from DD-MM-YYYY to YYYY-MM-DD
       const dateOfBirthFormatted = (values.dateOfBirth || dateOfBirth)
@@ -387,19 +396,26 @@ const GetStartedScreen = ({ route }) => {
 
       // Prepare profile data
       const profileData = {
-        first_name: firstName,
-        last_name: lastName,
+        name: fullName,
         date_of_birth: dateOfBirthFormatted,
         gender: genderFormatted,
       };
 
       // Add email or phone number based on login type
       if (isEmailLogin) {
-        profileData.email = values.email;
+        profileData.email = values.email.trim();
       } else {
-        // Format phone number with country code
-        const phoneNumber = values.phoneNumber.replace(/\D/g, ''); // Remove non-digits
-        profileData.phone_number = `${selectedCountry.dialCode}${phoneNumber}`;
+        // Format phone number with country code (same format as LoginScreen)
+        // Remove any non-digit characters and ensure it's a string
+        const phoneNumber = String(values.phoneNumber || '').replace(/\D/g, '');
+        // Ensure phone number is not empty and has valid length (7-15 digits, same as LoginScreen)
+        if (phoneNumber && phoneNumber.length >= 7 && phoneNumber.length <= 15) {
+          // Format exactly like LoginScreen: dialCode + phoneNumber
+          const formattedPhone = String(selectedCountry.dialCode) + String(phoneNumber);
+          profileData.phone_number = formattedPhone;
+        } else {
+          throw new Error('Please enter a valid phone number (7-15 digits)');
+        }
       }
 
       console.log('Submitting profile data:', profileData);
@@ -427,32 +443,73 @@ const GetStartedScreen = ({ route }) => {
 
       // Handle authentication errors specifically
       if (error.response?.status === 401 || error.status === 401) {
-        Alert.alert(
-          'Authentication Error',
-          'Your session has expired. Please login again.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Login' }],
-                });
-              }
-            }
-          ]
-        );
+        setErrorPopupMessage('Your session has expired. Please login again.');
+        setShowErrorPopup(true);
+        // Navigate to login after a delay
+        setTimeout(() => {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+        }, 2000);
       } else {
-        // Show error alert for other errors
-        Alert.alert(
-          'Error',
-          error.message || 'Failed to update profile. Please try again.',
-          [{ text: 'OK' }]
-        );
+        // Extract error message from backend response
+        let errorMessage = 'Failed to update profile. Please try again.';
+        
+        // Check for backend error response structure
+        const errorData = error?.response?.data || error?.data || {};
+        
+        // Helper function to clean error message (remove field name prefix)
+        const cleanErrorMessage = (message) => {
+          if (!message) return message;
+          // Remove field name prefixes like "phone_number: ", "email: ", etc.
+          return String(message).replace(/^[a-z_]+:\s*/i, '').trim();
+        };
+        
+        // First, check for main message
+        if (errorData.message) {
+          errorMessage = cleanErrorMessage(errorData.message);
+        }
+        // Check for field-specific errors (phone_number, email, etc.)
+        else if (errorData.data) {
+          // Handle phone number validation errors (array format)
+          if (errorData.data.phone_number) {
+            const phoneErrors = errorData.data.phone_number;
+            const rawError = Array.isArray(phoneErrors) ? phoneErrors[0] : String(phoneErrors);
+            errorMessage = cleanErrorMessage(rawError);
+          }
+          // Handle email validation errors (array format)
+          else if (errorData.data.email) {
+            const emailErrors = errorData.data.email;
+            const rawError = Array.isArray(emailErrors) ? emailErrors[0] : String(emailErrors);
+            errorMessage = cleanErrorMessage(rawError);
+          }
+          // Handle other field errors
+          else {
+            const fieldErrors = Object.values(errorData.data);
+            if (fieldErrors.length > 0) {
+              const firstError = fieldErrors[0];
+              const rawError = Array.isArray(firstError) ? firstError[0] : String(firstError);
+              errorMessage = cleanErrorMessage(rawError);
+            }
+          }
+        }
+        // Fallback to error message
+        else if (error?.message) {
+          errorMessage = cleanErrorMessage(error.message);
+        }
+
+        setErrorPopupMessage(errorMessage);
+        setShowErrorPopup(true);
       }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCloseErrorPopup = () => {
+    setShowErrorPopup(false);
+    setErrorPopupMessage('');
   };
 
   const genders = ['Male', 'Female', 'Other'];
@@ -467,12 +524,6 @@ const GetStartedScreen = ({ route }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
-          <StatusBar
-            style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true}
-          />
           <ScrollView
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
@@ -505,12 +556,12 @@ const GetStartedScreen = ({ route }) => {
                 initialValues={{
                   fullName: '',
                   dateOfBirth: '',
-                  email: isEmailLogin ? userIdentifier : '',
-                  phoneNumber: !isEmailLogin ? '' : '',
+                  email: isEmailLogin ? '' : '', // Show email field if user logged in with phone
+                  phoneNumber: !isEmailLogin ? '' : '', // Show phone field if user logged in with email
                   gender: '',
                 }}
                 validationSchema={validationSchema}
-              //onSubmit={handleContinue}
+                onSubmit={handleContinue}
               >
                 {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue, isValid }) => {
                   // Create enhanced handleChange that also triggers validation
@@ -568,7 +619,7 @@ const GetStartedScreen = ({ route }) => {
                         <TextInput
                           style={[
                             styles.inputField,
-                            touched.fullName && errors.fullName ? styles.inputError : null
+                            (touched.fullName || values.fullName) && errors.fullName ? styles.inputError : null
                           ]}
                           placeholder="Enter your Full Name"
                           placeholderTextColor={color.grey_87807C}
@@ -577,8 +628,18 @@ const GetStartedScreen = ({ route }) => {
                           value={values.fullName}
                           selectionColor={color.btnBrown_AE6F28}
                           autoCapitalize="words"
+                          returnKeyType="next"
+                          onSubmitEditing={() => {
+                            // Prevent moving to next field if current field is invalid
+                            const nameParts = (values.fullName?.trim() || '').split(/\s+/).filter(part => part.length > 0);
+                            const isValid = nameParts.length >= 2 && nameParts.every(part => part.length >= 2);
+                            if (!isValid) {
+                              // Keep focus on current field if invalid
+                              // The error will already be showing
+                            }
+                          }}
                         />
-                        {touched.fullName && errors.fullName && (
+                        {((touched.fullName || values.fullName) && errors.fullName) && (
                           <Caption color={color.red_FF0000} style={styles.errorText}>
                             {errors.fullName}
                           </Caption>
@@ -863,7 +924,7 @@ const GetStartedScreen = ({ route }) => {
                           <TouchableWithoutFeedback>
                             <View style={styles.yearPickerModal}>
                               <View style={styles.modalHandle} />
-                              
+
                               {/* Decade Header with Navigation */}
                               <View style={styles.yearPickerHeader}>
                                 <TouchableOpacity
@@ -873,7 +934,7 @@ const GetStartedScreen = ({ route }) => {
                                   <Ionicons name="chevron-back" size={20} color={color.black_544B45} />
                                   <Ionicons name="chevron-back" size={20} color={color.black_544B45} style={{ marginLeft: -8 }} />
                                 </TouchableOpacity>
-                                
+
                                 <Typography
                                   weight="600"
                                   size={16}
@@ -882,7 +943,7 @@ const GetStartedScreen = ({ route }) => {
                                 >
                                   {yearPickerDecade}-{yearPickerDecade + 9}
                                 </Typography>
-                                
+
                                 <TouchableOpacity
                                   onPress={() => navigateDecade('next')}
                                   style={styles.decadeNavButton}
@@ -897,7 +958,7 @@ const GetStartedScreen = ({ route }) => {
                                 {generateDecadeYears().map((year) => {
                                   const isCurrentDecade = year >= yearPickerDecade && year < yearPickerDecade + 10;
                                   const isSelected = calendarYear === year;
-                                  
+
                                   return (
                                     <TouchableOpacity
                                       key={year}
@@ -946,7 +1007,7 @@ const GetStartedScreen = ({ route }) => {
                           <TouchableWithoutFeedback>
                             <View style={styles.yearPickerModal}>
                               <View style={styles.modalHandle} />
-                              
+
                               {/* Month Picker Header */}
                               <View style={styles.yearPickerHeader}>
                                 <View style={styles.decadeNavButton} />
@@ -965,7 +1026,7 @@ const GetStartedScreen = ({ route }) => {
                               <View style={styles.yearsGrid}>
                                 {fullMonthNames.map((monthName, index) => {
                                   const isSelected = calendarMonth === index;
-                                  
+
                                   return (
                                     <TouchableOpacity
                                       key={index}
@@ -1055,7 +1116,7 @@ const GetStartedScreen = ({ route }) => {
             </View>
           </ScrollView>
 
-          {/* Continue Button - Fixed at bottom */}
+          {/* Continue Button - Fixed at bottom, doesn't move with keyboard */}
           {isFormValid && (
             <View style={styles.continueButtonContainer}>
               <TouchableOpacity
@@ -1090,6 +1151,15 @@ const GetStartedScreen = ({ route }) => {
               onClose={() => setShowCountryPicker(false)}
             />
           )}
+
+          {/* Error Popup */}
+          <OtpErrorPopup
+            visible={showErrorPopup}
+            onClose={handleCloseErrorPopup}
+            title="Error"
+            subtitle={errorPopupMessage || "Failed to update profile. Please try again."}
+            showResendButton={false}
+          />
         </View>
       </TouchableWithoutFeedback>
     </LinearGradient>
@@ -1102,8 +1172,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 20,
-    paddingBottom: 100, // Extra padding for Continue button
+    paddingHorizontal: 20,// Extra padding for Continue button
   },
   headerSection: {
     marginTop: 40,
@@ -1220,8 +1289,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
     backgroundColor: 'transparent',
+    zIndex: 1000,
+    elevation: Platform.OS === 'android' ? 1000 : 0,
   },
   continueButton: {
     width: '100%',

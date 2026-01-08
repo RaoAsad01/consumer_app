@@ -1,9 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
+import * as NavigationBar from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -18,6 +19,14 @@ const IMAGE_HEIGHT = height * 0.50;
 const SplashScreenComponent = () => {
   const navigation = useNavigation();
   const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Set navigation bar color for Splash screen
+    if (Platform.OS === 'android') {
+      NavigationBar.setBackgroundColorAsync('#F2C86C');
+      NavigationBar.setButtonStyleAsync('dark');
+    }
+  }, []);
 
   useEffect(() => {
     // Hide native splash screen immediately so our custom splash can show
@@ -54,12 +63,7 @@ const SplashScreenComponent = () => {
 
   return (
     <View style={styles.container}>
-       <StatusBar
-            style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true}
-          />
+     
       <SafeAreaView style={styles.safeArea}>
         {/* Top Section - Brown Background with Logo and Text */}
         <View style={styles.topSection}>
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   bottomSection: {
-    flex: 0.60,
+    flex: 0.50,
     width,   
     overflow: 'hidden',
   },

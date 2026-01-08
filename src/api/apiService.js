@@ -131,23 +131,23 @@ export const authService = {
     try {
       const response = await apiClient.post(endpoints.verifyOtp, data);
       console.log('API Response (Verify OTP):', JSON.stringify(response.data, null, 2));
-      
+
       // Try different possible locations for the access token
-      const accessToken = response.data?.access_token || 
-                         response.data?.data?.access_token ||
-                         response.data?.token;
-      
+      const accessToken = response.data?.access_token ||
+        response.data?.data?.access_token ||
+        response.data?.token;
+
       if (accessToken) {
         await SecureStore.setItemAsync('accessToken', accessToken);
         console.log('Token stored successfully');
-        
+
         // Verify token was stored
         const storedToken = await SecureStore.getItemAsync('accessToken');
         console.log('Token verification - stored:', storedToken ? 'Yes' : 'No');
       } else {
         console.warn('No access token found in response:', response.data);
       }
-      
+
       return response.data;
     } catch (error) {
       console.error('OTP Error:', {
@@ -387,7 +387,7 @@ export const ticketService = {
   ticketStatsListing: async (event_uuid, page = 1, staffUuid = null, status = 'PAID') => {
     try {
       let url = `${endpoints.ticketStatslist}?event_uuid=${event_uuid}&page=${page}&page_size=-1`;
-      
+
       // Add status filter
       if (status) {
         url += `&status=${status}`;
@@ -784,27 +784,26 @@ export const userService = {
       const formData = new FormData();
       
       // Append all fields to FormData
-      if (profileData.first_name) {
-        formData.append('first_name', profileData.first_name);
-      }
-      if (profileData.last_name) {
-        formData.append('last_name', profileData.last_name);
+      // Backend expects 'name' field (not first_name and last_name)
+      // Backend will automatically split it: if space exists, last part is last_name
+      if (profileData.name) {
+        formData.append('name', String(profileData.name));
       }
       if (profileData.email) {
-        formData.append('email', profileData.email);
+        formData.append('email', String(profileData.email));
       }
       if (profileData.phone_number) {
-        formData.append('phone_number', profileData.phone_number);
+        formData.append('phone_number', String(profileData.phone_number));
       }
       if (profileData.date_of_birth) {
-        formData.append('date_of_birth', profileData.date_of_birth);
+        formData.append('date_of_birth', String(profileData.date_of_birth));
       }
       if (profileData.gender) {
-        formData.append('gender', profileData.gender);
+        formData.append('gender', String(profileData.gender));
       }
-      
+
       console.log("Profile update FormData:", formData);
-      
+
       const response = await apiClient.patch(endpoints.updateProfile, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',

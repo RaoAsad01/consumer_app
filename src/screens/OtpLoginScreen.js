@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -144,6 +143,24 @@ const OtpLoginScreen = ({ route }) => {
     setSelectedOtpSource(otpSource);
     setShowOtpSourceModal(false);
 
+    // Check if user came with email and wants to switch to phone (WHATSAPP or SMS)
+    const userLoggedInWithEmail = isEmail(userIdentifier);
+    const switchingToPhone = (otpSource === 'WHATSAPP' || otpSource === 'SMS');
+    const switchingToEmail = (otpSource === 'EMAIL');
+
+    // If user came with email and selected WHATSAPP or SMS, navigate to LoginScreen with phone input
+    if (userLoggedInWithEmail && switchingToPhone) {
+      navigation.navigate('Login', { inputType: 'phone' });
+      return;
+    }
+
+    // If user came with phone and selected EMAIL, navigate to LoginScreen with email input
+    if (!userLoggedInWithEmail && switchingToEmail) {
+      navigation.navigate('Login', { inputType: 'email' });
+      return;
+    }
+
+    // Otherwise, resend OTP with the selected source (existing functionality)
     try {
       const payload = {
         user_identifier: userIdentifier,
@@ -211,20 +228,15 @@ const OtpLoginScreen = ({ route }) => {
     setErrorMessage('');
   };
   return (
-    <LinearGradient
-      colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          <StatusBar
-            style="light"
-            backgroundColor="transparent"
-            translucent
-            hidden={true}
-          />
+        <LinearGradient
+          colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ flex: 1 }}
+        >
+         
           <View style={styles.container}>
             {/* Header Section */}
             <View style={styles.headerSection}>
@@ -331,6 +343,14 @@ const OtpLoginScreen = ({ route }) => {
                   <SvgIcons.hexalloSvg width={40} height={40} />
                 </View>
                 <View style={styles.footerSection}>
+                  <Typography
+                    weight="450"
+                    size={12}
+                    color={color.brown_766F6A}
+                    style={styles.footerTextHexallo}
+                  >
+                    By Hexallo Enterprise
+                  </Typography>
                   <Typography
                     weight="450"
                     size={12}
@@ -450,9 +470,9 @@ const OtpLoginScreen = ({ route }) => {
               </View>
             </TouchableOpacity>
           </Modal>
-        </View>
+        </LinearGradient>
       </TouchableWithoutFeedback>
-    </LinearGradient>
+    </>
   );
 
 };
@@ -547,14 +567,13 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 50,
   },
   linkText: {
     textDecorationLine: 'underline',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   modalOverlay: {
     flex: 1,
@@ -597,6 +616,9 @@ const styles = StyleSheet.create({
   optionText: {
     marginLeft: 15,
     textAlign: 'left',
+  },
+  footerTextHexallo: {
+    marginBottom: 10,
   },
 });
 

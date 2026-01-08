@@ -459,11 +459,12 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    maxHeight: 38,
   },
   handleBar: {
     width: 40,
     height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(106, 58, 3, 1)',
     borderRadius: 2,
     marginBottom: 8,
   },
