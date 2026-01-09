@@ -11,7 +11,6 @@ import {
   ScrollView
 } from 'react-native';
 import { color } from '../color/color';
-import { eventService } from '../api/apiService';
 import Typography, { Body1, Heading5 } from './Typography';
 
 const EventsModal = ({ visible, onClose, onEventSelect, currentEventUuid }) => {
@@ -28,32 +27,11 @@ const EventsModal = ({ visible, onClose, onEventSelect, currentEventUuid }) => {
 
 
   const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await eventService.fetchStaffEvents();
-
-      if (response?.data && response.data.length > 0) {
-        // The response.data is already an array of events
-        const eventsData = response.data;
-
-        // Transform the events to match the expected format
-        const transformedEvents = eventsData.map(event => ({
-          uuid: event.uuid || event.id,
-          title: event.event_title || event.title
-        }));
-
-        setEvents(transformedEvents);
-      } else {
-        setEvents([]);
-      }
-    } catch (err) {
-      console.error('Error fetching events:', err);
-      setError('Failed to load events');
-      Alert.alert('Error', 'Failed to load events. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Consumer app: No staff events to fetch
+    // This modal is not used in consumer app flow
+    setLoading(false);
+    setEvents([]);
+    setError(null);
   };
 
   const handleEventPress = (event) => {

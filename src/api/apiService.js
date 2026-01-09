@@ -127,48 +127,61 @@ export const authService = {
   },
 
   // Verify OTP service
-  verifyOtp: async (data) => {
-    try {
-      const response = await apiClient.post(endpoints.verifyOtp, data);
-      console.log('API Response (Verify OTP):', JSON.stringify(response.data, null, 2));
-
-      // Try different possible locations for the access token
-      const accessToken = response.data?.access_token ||
-        response.data?.data?.access_token ||
-        response.data?.token;
-
-      if (accessToken) {
-        await SecureStore.setItemAsync('accessToken', accessToken);
-        console.log('Token stored successfully');
-
-        // Verify token was stored
-        const storedToken = await SecureStore.getItemAsync('accessToken');
-        console.log('Token verification - stored:', storedToken ? 'Yes' : 'No');
-      } else {
-        console.warn('No access token found in response:', response.data);
-      }
-
-      return response.data;
-    } catch (error) {
-      console.error('OTP Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        request: error.config?.data
-      });
-      if (error.response?.data) {
+    verifyOtp: async (data) => {
+      try {
+        console.log('🔐 Verifying OTP with payload:', { uuid: data.uuid, otp: '*' });
+        const response = await apiClient.post(endpoints.verifyOtp, data);
+        console.log('✅ OTP Verification Response Status:', response.status);
+        console.log('✅ OTP Verification Response Data:', JSON.stringify(response.data, null, 2));
+        
+        // Handle different response structures
+        // Structure 1: { success: true, data: { access_token: "..." } }
+        // Structure 2: { access_token: "..." } directly
+        const responseData = response.data;
+        const accessToken = responseData?.data?.access_token || responseData?.access_token;
+        
+        if (accessToken) {
+          await SecureStore.setItemAsync('accessToken', accessToken);
+          console.log('✅ Token stored successfully in SecureStore');
+          
+          // Verify token was stored
+          const storedToken = await SecureStore.getItemAsync('accessToken');
+          console.log('✅ Token verification - stored:', !!storedToken);
+        } else {
+          console.warn('⚠️ No access_token found in response');
+          console.warn('Response structure:', JSON.stringify(responseData, null, 2));
+        }
+        
+        // Return the full response data structure
+        return responseData;
+      } catch (error) {
+        console.error('❌ OTP Verification Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message,
+          request: error.config?.data,
+          url: error.config?.url,
+          baseURL: BASE_URL
+        });
+        
+        if (error.response?.data) {
+          const errorMessage = error.response.data.message || 
+                              error.response.data.error || 
+                              'Server error';
+          throw {
+            message: errorMessage,
+            response: error.response,
+            status: error.response?.status
+          };
+        }
         throw {
-          message: error.response.data.message || 'Server error',
-          response: error.response
+          message: 'Network error. Please check your connection.',
+          error: error
         };
       }
-      throw {
-        message: 'Network error. Please check your connection.',
-        error: error
-      };
-    }
-  },
-};
+    },
+  };
 
 // Add ticket service
 export const ticketService = {

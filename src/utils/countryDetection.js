@@ -7,22 +7,51 @@ import { countryCodes } from '../constants/countryCodes';
  */
 export const detectCountryCode = async () => {
   try {
-    console.log('Requesting location permissions...');
-    // Request location permissions
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    console.log('Checking location permissions...');
+    // First check if permission is already granted
+    let { status } = await Location.getForegroundPermissionsAsync();
+    
+    // If not granted, request it
     if (status !== 'granted') {
-      console.log('❌ Location permission not granted');
+      console.log('Requesting location permissions...');
+      const permissionResult = await Location.requestForegroundPermissionsAsync();
+      status = permissionResult.status;
+    }
+    
+    if (status !== 'granted') {
+      console.log('❌ Location permission not granted, status:', status);
       return null;
     }
     console.log('✅ Location permission granted');
 
     console.log('Getting current position...');
-    // Get current position
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-      timeout: 10000, // Increased timeout
-      maximumAge: 300000, // 5 minutes
-    });
+    // Get current position with better error handling
+    let location;
+    try {
+      location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+        timeout: 15000, // Increased timeout for slower devices
+        maximumAge: 300000, // 5 minutes
+      });
+    } catch (locationError) {
+      console.error('Error getting location:', locationError);
+      // Try with lower accuracy if high accuracy fails
+      try {
+        location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Low,
+          timeout: 10000,
+          maximumAge: 600000, // 10 minutes for low accuracy
+        });
+      } catch (lowAccuracyError) {
+        console.error('Error getting location with low accuracy:', lowAccuracyError);
+        return null;
+      }
+    }
+
+    if (!location || !location.coords) {
+      console.log('No location data obtained');
+      return null;
+    }
 
     console.log('Location obtained:', {
       latitude: location.coords.latitude,
@@ -31,16 +60,22 @@ export const detectCountryCode = async () => {
 
     console.log('Reverse geocoding...');
     // Reverse geocode to get address
-    const address = await Location.reverseGeocodeAsync({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
+    let address;
+    try {
+      address = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    } catch (geocodeError) {
+      console.error('Error reverse geocoding:', geocodeError);
+      return null;
+    }
 
     console.log('Address data:', address);
 
-    if (address && address.length > 0) {
+    if (address && address.length > 0 && address[0].isoCountryCode) {
       const countryCode = address[0].isoCountryCode;
-      console.log('Detected country code:', countryCode);
+      console.log('✅ Detected country code from location:', countryCode);
       return countryCode;
     }
 
@@ -59,22 +94,88 @@ export const detectCountryCode = async () => {
 export const detectCountryFromLocale = () => {
   try {
     console.log('Attempting locale-based country detection...');
-    // Get device locale
-    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-    console.log('Device locale:', locale);
     
+    // Try multiple methods to get locale
+    let locale;
+    try {
+      // Method 1: Intl.DateTimeFormat
+      locale = Intl.DateTimeFormat().resolvedOptions().locale;
+      console.log('Device locale (Intl):', locale);
+    } catch (e) {
+      console.log('Intl.DateTimeFormat failed, trying navigator...');
+      // Method 2: Navigator language
+      if (typeof navigator !== 'undefined' && navigator.language) {
+        locale = navigator.language;
+        console.log('Device locale (navigator):', locale);
+      }
+    }
+    
+    if (!locale) {
+      console.log('No locale found');
+      return null;
+    }
+    
+    // Extract country code from locale (format: en-US, en_US, etc.)
     const countryCode = locale.split('-')[1] || locale.split('_')[1];
     console.log('Extracted country code from locale:', countryCode);
     
     if (countryCode && countryCode.length === 2) {
-      console.log('Detected country code from locale:', countryCode);
-      return countryCode.toUpperCase();
+      const upperCode = countryCode.toUpperCase();
+      console.log('✅ Detected country code from locale:', upperCode);
+      return upperCode;
     }
     
     console.log('No valid country code found in locale');
     return null;
   } catch (error) {
     console.error('Error detecting country from locale:', error);
+    return null;
+  }
+};
+
+/**
+ * Detects country code from device timezone as fallback
+ * @returns {string|null} The detected country code or null if detection fails
+ */
+export const detectCountryFromTimezone = () => {
+  try {
+    console.log('Attempting timezone-based country detection...');
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log('Device timezone:', timezone);
+    
+    // Map common timezones to country codes
+    const timezoneToCountry = {
+      'Asia/Karachi': 'PK',
+      'Asia/Dubai': 'AE',
+      'Asia/Riyadh': 'SA',
+      'Asia/Kuwait': 'KW',
+      'Asia/Bahrain': 'BH',
+      'Asia/Qatar': 'QA',
+      'Asia/Muscat': 'OM',
+      'Asia/Kolkata': 'IN',
+      'Asia/Dhaka': 'BD',
+      'Asia/Colombo': 'LK',
+      'America/New_York': 'US',
+      'America/Los_Angeles': 'US',
+      'Europe/London': 'GB',
+      'Europe/Paris': 'FR',
+      'Europe/Berlin': 'DE',
+      'Asia/Singapore': 'SG',
+      'Asia/Kuala_Lumpur': 'MY',
+      'Africa/Accra': 'GH',
+      'Africa/Lagos': 'NG',
+    };
+    
+    const countryCode = timezoneToCountry[timezone];
+    if (countryCode) {
+      console.log('✅ Detected country code from timezone:', countryCode);
+      return countryCode;
+    }
+    
+    console.log('No country code found for timezone:', timezone);
+    return null;
+  } catch (error) {
+    console.error('Error detecting country from timezone:', error);
     return null;
   }
 };
@@ -99,34 +200,49 @@ export const getAutoDetectedCountry = async () => {
   try {
     console.log('Starting country auto-detection...');
     
-    // First try location-based detection
-    console.log('Attempting location-based detection...');
+    // Method 1: Try location-based detection (most accurate)
+    console.log('Method 1: Attempting location-based detection...');
     const detectedIsoCode = await detectCountryCode();
     console.log('Location detection result:', detectedIsoCode);
     
     if (detectedIsoCode) {
       const country = findCountryByIsoCode(detectedIsoCode);
-      console.log('Found country from location:', country);
       if (country) {
-        console.log('Country detected from location:', country.name);
+        console.log('Country detected from location:', country.name, country.code);
         return country;
       } else {
         console.log('Country not found in our list for code:', detectedIsoCode);
       }
     } else {
-      console.log('Location detection failed');
+      console.log('Location detection failed or permission denied');
     }
     
-    // Fallback to locale-based detection
-    console.log('Attempting locale-based detection...');
+    // Method 2: Try timezone-based detection (more reliable than locale)
+    console.log('Method 2: Attempting timezone-based detection...');
+    const timezoneIsoCode = detectCountryFromTimezone();
+    console.log('Timezone detection result:', timezoneIsoCode);
+    
+    if (timezoneIsoCode) {
+      const country = findCountryByIsoCode(timezoneIsoCode);
+      if (country) {
+        console.log('Country detected from timezone:', country.name, country.code);
+        return country;
+      } else {
+        console.log('Country not found in our list for code:', timezoneIsoCode);
+      }
+    } else {
+      console.log('Timezone detection failed');
+    }
+    
+    // Method 3: Fallback to locale-based detection
+    console.log('Method 3: Attempting locale-based detection...');
     const localeIsoCode = detectCountryFromLocale();
     console.log('Locale detection result:', localeIsoCode);
     
     if (localeIsoCode) {
       const country = findCountryByIsoCode(localeIsoCode);
-      console.log('Found country from locale:', country);
       if (country) {
-        console.log('Country detected from locale:', country.name);
+        console.log('Country detected from locale:', country.name, country.code);
         return country;
       } else {
         console.log('Country not found in our list for code:', localeIsoCode);
@@ -135,23 +251,24 @@ export const getAutoDetectedCountry = async () => {
       console.log('Locale detection failed');
     }
     
-    // Final fallback to default country (Ghana)
-    console.log('Using default country: Ghana');
-    return findCountryByIsoCode('GH') || {
-      name: 'Ghana',
-      code: 'GH',
-      dialCode: '+233',
-      flag: '🇬🇭'
+    // Final fallback to default country (Pakistan)
+    console.log('⚠️ All detection methods failed, using default country: Pakistan');
+    const defaultCountry = findCountryByIsoCode('PK') || {
+      name: 'Pakistan',
+      code: 'PK',
+      dialCode: '+92',
+      flag: '🇵🇰'
     };
+    return defaultCountry;
     
   } catch (error) {
-    console.error('Error in getAutoDetectedCountry:', error);
+    console.error('❌ Error in getAutoDetectedCountry:', error);
     // Return default country on error
-    return findCountryByIsoCode('GH') || {
-      name: 'Ghana',
-      code: 'GH',
-      dialCode: '+233',
-      flag: '🇬🇭'
+    return findCountryByIsoCode('PK') || {
+      name: 'Pakistan',
+      code: 'PK',
+      dialCode: '+92',
+      flag: '🇵🇰'
     };
   }
 };

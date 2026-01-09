@@ -54,6 +54,14 @@
           "recordAudioAndroid": true
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "This app uses location to automatically detect your country code for phone number input.",
+          "locationAlwaysPermission": "This app uses location to automatically detect your country code for phone number input.",
+          "locationWhenInUsePermission": "This app uses location to automatically detect your country code for phone number input."
+        }
+      ],
       "expo-router",
       "expo-secure-store"
     ],

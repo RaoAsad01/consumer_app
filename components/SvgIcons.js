@@ -19,9 +19,12 @@ import DashboardInactiveIcon from '../assets/svgs/dashboard_inactive_icon.svg';
 import DashboardInactiveIconWhite from '../assets/svgs/dashboard_inactive_icon_white.svg';
 import DownArrow from '../assets/svgs/downArrow.svg';
 import DownArrowWhite from '../assets/svgs/downarrow_white.svg';
+import DummyImageExploreCategory from '../assets/svgs/dummy_image_explore_category.svg';
 import EmailBlackIcon from '../assets/svgs/email-black-icon.svg';
 import ExploreBottomTabIcon from '../assets/svgs/explore-bottom-tab-icon.svg';
+import FavouriteIconConsumer from '../assets/svgs/favourite_icon_consumer.svg';
 import FilterIcon from '../assets/svgs/filter-icon.svg';
+import FilterIconConsumer from '../assets/svgs/filter_icon.svg';
 import DrawerSVG from '../assets/svgs/hamburger-lg.svg';
 import HexalloSVG from '../assets/svgs/hexallo-icon.svg';
 import HomeDrawerIcon from '../assets/svgs/home-drawer-icon.svg';
@@ -31,6 +34,8 @@ import SmsIcon from '../assets/svgs/icon_chat_message.svg';
 import EmailIcon from '../assets/svgs/icon_email.svg';
 import WhatsappIcon from '../assets/svgs/icon_whatsapp.svg';
 import IllustrationSplashImage from '../assets/svgs/Illustration_splash_image.svg';
+import InviteGiftImage from '../assets/svgs/invite_gift_image.svg';
+import LocationIcon from '../assets/svgs/location_icon.svg';
 import ManualActiveTabSVG from '../assets/svgs/manual_active_tab.svg';
 import ManualInActiveTabSVG from '../assets/svgs/manual_inactive_tab.svg';
 import ManualInActiveTabSVGWhite from '../assets/svgs/manual_inactive_tab_white.svg';
@@ -46,6 +51,7 @@ import PlaceholderImage from '../assets/svgs/placeholder_img.svg';
 import ProfileMenuIconWhite from '../assets/svgs/profile-icon-white.svg';
 import ProfileCameraIcon from '../assets/svgs/profile_camera_icon.svg';
 import ProfileIconInActive from '../assets/svgs/profile_icon_inactive.svg';
+import ProfilePersonImage from '../assets/svgs/profile_person_image.svg';
 import QRIcon from '../assets/svgs/qr_icon.svg';
 import RemoveIcon from '../assets/svgs/remove_icon.svg';
 import RightArrowWhite from '../assets/svgs/right-arrow-white.svg';
@@ -136,4 +142,10 @@ export default {
     mobilityInactiveBottomIcon: MobilityInactiveBottomIcon,
     marketplaceInactiveBottomIcon: MarketplaceInactiveBottomIcon,
     moreInactiveBottomIcon: MoreInactiveBottomIcon,
+    profilePersonImage: ProfilePersonImage,
+    locationIcon: LocationIcon,
+    filterIconConsumer: FilterIconConsumer,
+    inviteGiftImage: InviteGiftImage,
+    favouriteIconConsumer: FavouriteIconConsumer,
+    dummyImageExploreCategory: DummyImageExploreCategory,
 };

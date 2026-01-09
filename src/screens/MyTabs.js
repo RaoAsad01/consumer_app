@@ -73,59 +73,9 @@ function MyTabs() {
             console.log('Fetched event info from backend:', transformedEventInfo);
             setEventInformation(transformedEventInfo);
           } else {
-            console.log('No last event UUID found in storage, fetching user events...');
-            // Fallback: fetch user events and use the first available event
-            try {
-              const staffEventsData = await eventService.fetchStaffEvents();
-              const eventsList = staffEventsData?.data;
-              
-              if (eventsList && eventsList.length > 0) {
-                let selectedEvent = null;
-                
-                // Handle different data structures for ADMIN vs Organizer roles
-                if (eventsList[0].events && Array.isArray(eventsList[0].events)) {
-                  // For organizer role: eventsList[0] contains {events: [...], staff: "..."}
-                  if (eventsList[0].events.length > 0) {
-                    selectedEvent = eventsList[0].events[0];
-                  }
-                } else {
-                  // For admin role or direct event structure
-                  selectedEvent = eventsList[0];
-                }
-                
-                if (selectedEvent) {
-                  const eventUuid = selectedEvent.uuid || selectedEvent.eventUuid;
-                  console.log('Using first available event:', eventUuid);
-                  
-                  // Store this event UUID for future use
-                  await SecureStore.setItemAsync('lastSelectedEventUuid', eventUuid);
-                  
-                  // Fetch event info
-                  const eventInfoData = await eventService.fetchEventInfo(eventUuid);
-                  
-                  const transformedEventInfo = {
-                    staff_name: eventInfoData?.data?.staff_name,
-                    event_title: eventInfoData?.data?.event_title,
-                    cityName: eventInfoData?.data?.location?.city,
-                    date: eventInfoData?.data?.start_date,
-                    time: eventInfoData?.data?.start_time,
-                    userId: eventInfoData?.data?.staff_id,
-                    scanCount: eventInfoData?.data?.scan_count,
-                    event_uuid: eventInfoData?.data?.location?.uuid,
-                    eventUuid: eventUuid
-                  };
-                  
-                  console.log('Fetched fallback event info from backend:', transformedEventInfo);
-                  setEventInformation(transformedEventInfo);
-                } else {
-                  console.log('No events available for user');
-                }
-              } else {
-                console.log('No events found for user');
-              }
-            } catch (fallbackError) {
-              console.error('Error fetching fallback events:', fallbackError);
-            }
+            console.log('No last event UUID found in storage. Consumer app does not fetch staff events.');
+            // Consumer app: No need to fetch staff events
+            // User will need to select an event through the app flow
           }
         } catch (error) {
           console.error('Error fetching event info on app restart:', error);

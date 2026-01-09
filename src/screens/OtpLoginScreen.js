@@ -230,12 +230,12 @@ const OtpLoginScreen = ({ route }) => {
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <LinearGradient
-          colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ flex: 1 }}
-        >
+    <LinearGradient
+      colors={['#D9BA95', '#F5F5F5', '#D9BA95']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
          
           <View style={styles.container}>
             {/* Header Section */}
