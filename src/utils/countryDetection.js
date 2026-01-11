@@ -19,10 +19,10 @@ export const detectCountryCode = async () => {
     }
     
     if (status !== 'granted') {
-      console.log('❌ Location permission not granted, status:', status);
+      console.log('Location permission not granted, status:', status);
       return null;
     }
-    console.log('✅ Location permission granted');
+    console.log('Location permission granted');
 
     console.log('Getting current position...');
     // Get current position with better error handling
@@ -75,7 +75,7 @@ export const detectCountryCode = async () => {
 
     if (address && address.length > 0 && address[0].isoCountryCode) {
       const countryCode = address[0].isoCountryCode;
-      console.log('✅ Detected country code from location:', countryCode);
+      console.log('Detected country code from location:', countryCode);
       return countryCode;
     }
 
@@ -168,7 +168,7 @@ export const detectCountryFromTimezone = () => {
     
     const countryCode = timezoneToCountry[timezone];
     if (countryCode) {
-      console.log('✅ Detected country code from timezone:', countryCode);
+      console.log('Detected country code from timezone:', countryCode);
       return countryCode;
     }
     
@@ -252,7 +252,7 @@ export const getAutoDetectedCountry = async () => {
     }
     
     // Final fallback to default country (Pakistan)
-    console.log('⚠️ All detection methods failed, using default country: Pakistan');
+    console.log('All detection methods failed, using default country: Pakistan');
     const defaultCountry = findCountryByIsoCode('PK') || {
       name: 'Pakistan',
       code: 'PK',
@@ -262,7 +262,7 @@ export const getAutoDetectedCountry = async () => {
     return defaultCountry;
     
   } catch (error) {
-    console.error('❌ Error in getAutoDetectedCountry:', error);
+    console.error('Error in getAutoDetectedCountry:', error);
     // Return default country on error
     return findCountryByIsoCode('PK') || {
       name: 'Pakistan',

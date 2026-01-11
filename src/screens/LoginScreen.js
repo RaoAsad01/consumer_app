@@ -312,7 +312,7 @@ const LoginScreen = ({ route }) => {
                       color={color.brown_766F6A}
                       style={styles.footerText}
                     >
-                      By getting started, you accept{' '}
+                      By getting started, you accept our{' '}
                       <Typography weight="600" size={12} color={color.brown_766F6A} style={styles.linkText}>
                         Terms of Use
                       </Typography>

@@ -1,10 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useRoute } from '@react-navigation/native';
-import * as SecureStore from 'expo-secure-store';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
+  Extrapolate,
+  interpolate,
   runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -12,11 +13,8 @@ import Animated, {
   withSpring
 } from 'react-native-reanimated';
 import SvgIcons from '../../components/SvgIcons';
-import { eventService } from '../api/apiService';
 import { color } from '../color/color';
 import Typography from '../components/Typography';
-import ExploreCategories from '../screens/ExploreCategories';
-import { fetchUpdatedScanCount, updateEventInfoScanCount } from '../utils/scanCountUpdater';
 import HomeScreen from './CheckIn';
 import ConsumerHomeScreen from './HomeScreen';
 import ManualScan from './ManualScan';
@@ -24,112 +22,16 @@ import ProfileScreen from './ProfileScreen';
 import Tickets from './Tickets';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const COLLAPSED_HEIGHT = 120; // Height when collapsed (header + tabs)
+const HEADER_HEIGHT = 50; // Fixed header height
+const TAB_BAR_HEIGHT = 70; // Fixed tab bar height
+const COLLAPSED_HEIGHT = HEADER_HEIGHT + TAB_BAR_HEIGHT; // Total collapsed height
 const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.7; // Height when expanded
+const CATEGORIES_MAX_HEIGHT = EXPANDED_HEIGHT - COLLAPSED_HEIGHT; // Available space for categories
 
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
   const route = useRoute();
-  const initialEventInfo = route?.params?.eventInfo;
-  const [eventInformation, setEventInformation] = useState(initialEventInfo);
-  const [isLoadingEventInfo, setIsLoadingEventInfo] = useState(false);
-
-  // Update eventInfo when route params change
-  useEffect(() => {
-    if (route?.params?.eventInfo) {
-      setEventInformation(route.params.eventInfo);
-    }
-  }, [route?.params?.eventInfo]);
-
-  // Fetch event info if not available (app restart scenario)
-  useEffect(() => {
-    const fetchEventInfoIfNeeded = async () => {
-      if (!eventInformation?.eventUuid) {
-        try {
-          setIsLoadingEventInfo(true);
-          console.log('No eventInfo found, fetching from backend...');
-          
-          // Try to get the last selected event from secure storage
-          const lastEventUuid = await SecureStore.getItemAsync('lastSelectedEventUuid');
-          console.log('Retrieved stored UUID:', lastEventUuid);
-          
-          if (lastEventUuid) {
-            console.log('Found last event UUID in storage:', lastEventUuid);
-            const eventInfoData = await eventService.fetchEventInfo(lastEventUuid);
-            
-            const transformedEventInfo = {
-              staff_name: eventInfoData?.data?.staff_name,
-              event_title: eventInfoData?.data?.event_title,
-              cityName: eventInfoData?.data?.location?.city,
-              date: eventInfoData?.data?.start_date,
-              time: eventInfoData?.data?.start_time,
-              userId: eventInfoData?.data?.staff_id,
-              scanCount: eventInfoData?.data?.scan_count,
-              event_uuid: eventInfoData?.data?.location?.uuid,
-              eventUuid: lastEventUuid
-            };
-            
-            console.log('Fetched event info from backend:', transformedEventInfo);
-            setEventInformation(transformedEventInfo);
-          } else {
-            console.log('No last event UUID found in storage. Consumer app does not fetch staff events.');
-            // Consumer app: No need to fetch staff events
-            // User will need to select an event through the app flow
-          }
-        } catch (error) {
-          console.error('Error fetching event info on app restart:', error);
-        } finally {
-          setIsLoadingEventInfo(false);
-        }
-      }
-    };
-
-    fetchEventInfoIfNeeded();
-  }, []);
-
-  // Function to update scan count
-  const updateScanCount = async () => {
-    if (!eventInformation?.eventUuid) return;
-
-    try {
-      const newScanCount = await fetchUpdatedScanCount(eventInformation.eventUuid);
-      if (newScanCount !== null) {
-        const updatedEventInfo = updateEventInfoScanCount(eventInformation, newScanCount);
-        setEventInformation(updatedEventInfo);
-      }
-    } catch (error) {
-      console.error('Error updating scan count:', error);
-    }
-  };
-
-  // Function to handle event change from dashboard
-  const handleEventChange = async (newEvent) => {
-    console.log('Event changed to:', newEvent);
-    // Transform the event data to match the expected format
-    const transformedEvent = {
-      eventUuid: newEvent.uuid,
-      event_title: newEvent.title,
-      uuid: newEvent.uuid,
-      cityName: eventInformation?.cityName || 'Accra',
-      date: eventInformation?.date || '28-12-2024',
-      time: eventInformation?.time || '7:00 PM',
-    };
-    
-    // Store the new event UUID for app restart scenarios
-    try {
-      await SecureStore.setItemAsync('lastSelectedEventUuid', newEvent.uuid);
-      console.log('Stored new selected event UUID:', newEvent.uuid);
-    } catch (error) {
-      console.error('Error storing event UUID:', error);
-    }
-    
-    setEventInformation(transformedEvent);
-    
-    // The dashboard will automatically refresh its data when eventInformation changes
-    // because it depends on eventInfo?.eventUuid in the useEffect
-  };
-
   // Tab mapping to new design
   const tabMapping = {
     'Dashboard': { label: 'Explore', icon: SvgIcons.exploreBottomTabIcon, inactiveIcon: SvgIcons.dashboardInactiveIcon },
@@ -141,149 +43,178 @@ function MyTabs() {
 
   const CustomTabBar = ({ state, descriptors, navigation }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const containerHeight = useSharedValue(COLLAPSED_HEIGHT);
+    const categoriesHeight = useSharedValue(0);
+
+    const updateExpandedState = (expanded) => {
+      setIsExpanded(expanded);
+    };
 
     const toggleExpanded = () => {
       const newExpanded = !isExpanded;
-      setIsExpanded(newExpanded);
-      containerHeight.value = withSpring(newExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT, {
-        damping: 20,
-        stiffness: 90,
+      setIsExpanded(newExpanded); // Update immediately for smooth UI
+      categoriesHeight.value = withSpring(newExpanded ? CATEGORIES_MAX_HEIGHT : 0, {
+        damping: 25,
+        stiffness: 150,
+        mass: 0.8,
       });
     };
 
     const gestureHandler = useAnimatedGestureHandler({
       onStart: (_, ctx) => {
-        ctx.startY = containerHeight.value;
+        ctx.startY = categoriesHeight.value;
+        ctx.isExpanded = categoriesHeight.value > CATEGORIES_MAX_HEIGHT / 2;
       },
       onActive: (event, ctx) => {
         const newHeight = ctx.startY - event.translationY;
-        
-        if (isExpanded) {
+
+        if (ctx.isExpanded) {
           // When expanded, allow dragging down to collapse
           if (event.translationY > 0) {
-            containerHeight.value = Math.max(COLLAPSED_HEIGHT, newHeight);
+            categoriesHeight.value = Math.max(0, newHeight);
+          } else {
+            // Allow slight bounce back
+            categoriesHeight.value = Math.min(CATEGORIES_MAX_HEIGHT, newHeight);
           }
         } else {
           // When collapsed, allow dragging up to expand
           if (event.translationY < 0) {
-            containerHeight.value = Math.min(EXPANDED_HEIGHT, newHeight);
+            categoriesHeight.value = Math.min(CATEGORIES_MAX_HEIGHT, newHeight);
+          } else {
+            // Prevent negative values
+            categoriesHeight.value = Math.max(0, newHeight);
           }
         }
       },
-      onEnd: (event) => {
-        const threshold = (EXPANDED_HEIGHT + COLLAPSED_HEIGHT) / 2;
-        
-        if (containerHeight.value > threshold) {
+      onEnd: () => {
+        const threshold = CATEGORIES_MAX_HEIGHT / 2;
+        const shouldExpand = categoriesHeight.value > threshold;
+
+        if (shouldExpand) {
           // Expand
-          containerHeight.value = withSpring(EXPANDED_HEIGHT, {
-            damping: 20,
-            stiffness: 90,
+          categoriesHeight.value = withSpring(CATEGORIES_MAX_HEIGHT, {
+            damping: 25,
+            stiffness: 150,
+            mass: 0.8,
+          }, () => {
+            runOnJS(updateExpandedState)(true);
           });
-          runOnJS(setIsExpanded)(true);
         } else {
           // Collapse
-          containerHeight.value = withSpring(COLLAPSED_HEIGHT, {
-            damping: 20,
-            stiffness: 90,
+          categoriesHeight.value = withSpring(0, {
+            damping: 25,
+            stiffness: 150,
+            mass: 0.8,
+          }, () => {
+            runOnJS(updateExpandedState)(false);
           });
-          runOnJS(setIsExpanded)(false);
         }
       },
     });
 
-    const animatedContainerStyle = useAnimatedStyle(() => {
+    const animatedCategoriesStyle = useAnimatedStyle(() => {
+      const opacity = interpolate(
+        categoriesHeight.value,
+        [0, 10, CATEGORIES_MAX_HEIGHT],
+        [0, 1, 1],
+        Extrapolate.CLAMP
+      );
+
       return {
-        height: containerHeight.value,
+        height: categoriesHeight.value,
+        opacity: opacity,
       };
     });
 
     return (
       <GestureHandlerRootView style={styles.gestureContainer}>
-        <PanGestureHandler onGestureEvent={gestureHandler}>
-          <Animated.View style={[styles.customTabBarContainer, animatedContainerStyle]}>
-            {/* Brown Header Section - Touchable to toggle */}
-            <TouchableOpacity
-              style={styles.tabBarHeader}
-              onPress={toggleExpanded}
-              activeOpacity={0.8}
+        <View style={styles.customTabBarContainer}>
+          {/* Brown Header Section - Touchable to toggle and draggable */}
+          <PanGestureHandler onGestureEvent={gestureHandler}>
+            <Animated.View>
+              <TouchableOpacity
+                style={styles.tabBarHeader}
+                onPress={toggleExpanded}
+                activeOpacity={0.8}
+              >
+                <View style={styles.handleBar} />
+                <Typography
+                  weight="600"
+                  size={16}
+                  color={color.btnTxt_FFF6DF}
+                  style={styles.headerText}
+                >
+                  Explore Categories
+                </Typography>
+              </TouchableOpacity>
+            </Animated.View>
+          </PanGestureHandler>
+
+          {/* Scrollable Categories Section - Animated height */}
+          {/* <Animated.View style={[styles.categoriesContainer, animatedCategoriesStyle]} pointerEvents={isExpanded ? 'auto' : 'none'}>
+            <ScrollView
+              style={styles.categoriesScrollView}
+              contentContainerStyle={styles.categoriesScrollContent}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              bounces={false}
+              scrollEnabled={isExpanded}
             >
-              <View style={styles.handleBar} />
-              <Typography
-                weight="600"
-                size={16}
-                color={color.btnTxt_FFF6DF}
-                style={styles.headerText}
-              >
-                Explore Categories
-              </Typography>
-            </TouchableOpacity>
-            
-            {/* Scrollable Categories Section - Only visible when expanded */}
-            {isExpanded && (
-              <ScrollView
-                style={styles.categoriesScrollView}
-                contentContainerStyle={styles.categoriesScrollContent}
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}
-              >
-                <ExploreCategories />
-              </ScrollView>
-            )}
-            
-            {/* White Container with Tabs */}
-            <View style={styles.tabBarContent}>
-              {state.routes.map((route, index) => {
-                const { options } = descriptors[route.key];
-                const isFocused = state.index === index;
-                const tabInfo = tabMapping[route.name] || { label: route.name, icon: null, inactiveIcon: null };
+              <ExploreCategories />
+            </ScrollView>
+          </Animated.View> */}
 
-                const onPress = () => {
-                  const event = navigation.emit({
-                    type: 'tabPress',
-                    target: route.key,
-                    canPreventDefault: true,
-                  });
+          {/* White Container with Tabs - Fixed at bottom */}
+          <View style={styles.tabBarContent}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              const isFocused = state.index === index;
+              const tabInfo = tabMapping[route.name] || { label: route.name, icon: null, inactiveIcon: null };
 
-                  if (!isFocused && !event.defaultPrevented) {
-                    navigation.navigate(route.name);
-                  }
-                };
+              const onPress = () => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
 
-                const IconComponent = isFocused ? tabInfo.icon : tabInfo.inactiveIcon;
+                if (!isFocused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
+              };
 
-                return (
-                  <TouchableOpacity
-                    key={route.key}
-                    accessibilityRole="button"
-                    accessibilityState={isFocused ? { selected: true } : {}}
-                    accessibilityLabel={options.tabBarAccessibilityLabel}
-                    testID={options.tabBarTestID}
-                    onPress={onPress}
-                    style={styles.tabItem}
-                    activeOpacity={0.7}
+              const IconComponent = isFocused ? tabInfo.icon : tabInfo.inactiveIcon;
+
+              return (
+                <TouchableOpacity
+                  key={route.key}
+                  accessibilityRole="button"
+                  accessibilityState={isFocused ? { selected: true } : {}}
+                  accessibilityLabel={options.tabBarAccessibilityLabel}
+                  testID={options.tabBarTestID}
+                  onPress={onPress}
+                  style={styles.tabItem}
+                  activeOpacity={0.7}
+                >
+                  {IconComponent && (
+                    <IconComponent
+                      width={24}
+                      height={24}
+                    // fill={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                    />
+                  )}
+                  <Typography
+                    weight={isFocused ? "600" : "400"}
+                    size={12}
+                    color={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
+                    style={styles.tabLabel}
                   >
-                    {IconComponent && (
-                      <IconComponent 
-                        width={24} 
-                        height={24} 
-                        // fill={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
-                      />
-                    )}
-                    <Typography
-                      weight={isFocused ? "600" : "400"}
-                      size={12}
-                      color={isFocused ? color.btnBrown_AE6F28 : color.grey_87807C}
-                      style={styles.tabLabel}
-                    >
-                      {tabInfo.label}
-                    </Typography>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </Animated.View>
-        </PanGestureHandler>
+                    {tabInfo.label}
+                  </Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
       </GestureHandlerRootView>
     );
   };
@@ -298,8 +229,8 @@ function MyTabs() {
     >
       <Tab.Screen
         name="Dashboard"
-        options={{ 
-          headerShown: false, 
+        options={{
+          headerShown: false,
           unmountOnBlur: true,
           statusBarStyle: 'dark',
           statusBarBackgroundColor: 'white',
@@ -311,29 +242,15 @@ function MyTabs() {
 
       <Tab.Screen
         name="Tickets"
-        options={{ 
-          headerShown: false, 
+        options={{
+          headerShown: false,
           unmountOnBlur: true,
           statusBarStyle: 'dark',
           statusBarBackgroundColor: 'white',
           statusBarTranslucent: false
         }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: 'Tickets',
-                  params: { fromTab: true, eventInfo: eventInformation },
-                },
-              ],
-            });
-          },
-        })}
       >
-        {(props) => <Tickets {...props} eventInfo={eventInformation} onScanCountUpdate={updateScanCount} />}
+        {() => <Tickets />}
       </Tab.Screen>
 
       <Tab.Screen
@@ -346,27 +263,27 @@ function MyTabs() {
           statusBarTranslucent: false
         }}
       >
-        {() => <HomeScreen eventInfo={eventInformation} onScanCountUpdate={updateScanCount} />}
+        {() => <HomeScreen />}
       </Tab.Screen>
 
       <Tab.Screen
         name="Manual"
-        options={{ 
-          headerShown: false, 
+        options={{
+          headerShown: false,
           unmountOnBlur: true,
           statusBarStyle: 'dark',
           statusBarBackgroundColor: 'white',
           statusBarTranslucent: false
         }}
       >
-        {() => <ManualScan eventInfo={eventInformation} onScanCountUpdate={updateScanCount} />}
+        {() => <ManualScan />}
       </Tab.Screen>
 
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ 
-          headerShown: false, 
+        options={{
+          headerShown: false,
           unmountOnBlur: true,
           statusBarStyle: 'dark',
           statusBarBackgroundColor: 'white',
@@ -385,7 +302,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   customTabBarContainer: {
-    backgroundColor: color.btnBrown_AE6F28,
+    backgroundColor: 'transparent',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',
@@ -409,7 +326,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    maxHeight: 38,
+    minHeight: HEADER_HEIGHT,
   },
   handleBar: {
     width: 40,
@@ -421,9 +338,12 @@ const styles = StyleSheet.create({
   headerText: {
     textAlign: 'center',
   },
-  categoriesScrollView: {
-    maxHeight: 500,
+  categoriesContainer: {
     backgroundColor: '#F5F5F5',
+    overflow: 'hidden',
+  },
+  categoriesScrollView: {
+    flex: 1,
   },
   categoriesScrollContent: {
     paddingBottom: 20,
@@ -438,6 +358,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 20 : 12,
     justifyContent: 'space-around',
     alignItems: 'center',
+    minHeight: TAB_BAR_HEIGHT,
   },
   tabItem: {
     flex: 1,

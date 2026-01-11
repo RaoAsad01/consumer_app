@@ -37,5 +37,6 @@ export const color = {
     red_EF3E32: "#EF3E32",
     white_CDCDCD: "#CDCDCD",
     grey_AFAFAF: "#AFAFAF",
+    grey_9F9996: "#9F9996"
   };
   

@@ -56,6 +56,7 @@ import QRIcon from '../assets/svgs/qr_icon.svg';
 import RemoveIcon from '../assets/svgs/remove_icon.svg';
 import RightArrowWhite from '../assets/svgs/right-arrow-white.svg';
 import ArrowRight from '../assets/svgs/right-arrow.svg';
+import SearchBarIcon from '../assets/svgs/search_bar_icon.svg';
 import SearchIcon from '../assets/svgs/search_icon.svg';
 import ServicesInactiveBottomIcon from '../assets/svgs/services-inactive-bottom-icon.svg';
 import ShadowGlowSplash from '../assets/svgs/shadow-glow-splash.svg';
@@ -148,4 +149,5 @@ export default {
     inviteGiftImage: InviteGiftImage,
     favouriteIconConsumer: FavouriteIconConsumer,
     dummyImageExploreCategory: DummyImageExploreCategory,
+    searchBarIcon: SearchBarIcon,
 };

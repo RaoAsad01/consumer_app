@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -13,7 +13,6 @@ import {
   View
 } from 'react-native';
 import SvgIcons from '../../components/SvgIcons';
-import { userService } from '../api/apiService';
 import { color } from '../color/color';
 import Typography from '../components/Typography';
 
@@ -36,33 +35,6 @@ const ExploreScreen = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
-  const fetchUserProfile = async () => {
-    try {
-      const response = await userService.getProfile();
-      if (response?.success && response?.data) {
-        setUserData(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Get user's first name or default
-  const getUserFirstName = () => {
-    if (userData?.first_name) return userData.first_name;
-    if (userData?.name) {
-      const nameParts = userData.name.split(' ');
-      return nameParts[0] || 'User';
-    }
-    return 'User';
-  };
-
   // Get user's location or default
   const getUserLocation = () => {
     // You can add location logic here based on your API response
@@ -83,15 +55,15 @@ const ExploreScreen = () => {
         <Typography weight="700" size={16} color={color.placeholderTxt_24282C} numberOfLines={1} style={styles.cardTitle}>
           {item.title}
         </Typography>
-        <Typography weight="400" size={12} color={color.grey_87807C} style={styles.cardDate}>
+        <Typography weight="450" size={12} color={color.brown_766F6A} style={styles.cardDate}>
           {item.date}
         </Typography>
         <View style={styles.cardLocationPriceRow}>
-          <Typography weight="400" size={12} color={color.grey_87807C} style={styles.cardLocation}>
+          <Typography weight="450" size={12} color={color.brown_766F6A} style={styles.cardLocation}>
             {item.location}
           </Typography>
           <View style={styles.cardPriceContainer}>
-            <Typography weight="400" size={12} color={color.grey_87807C}>
+            <Typography weight="450" size={10} color={color.grey_9F9996}>
               from{' '}
             </Typography>
             <Typography weight="700" size={16} color={color.btnBrown_AE6F28}>
@@ -106,7 +78,7 @@ const ExploreScreen = () => {
   const renderSection = (title, data, isLast = false) => (
     <View style={[styles.sectionContainer, isLast && styles.lastSectionContainer]}>
       <View style={styles.sectionHeader}>
-        <Typography weight="700" size={18} color={color.brown_3C200A}>
+        <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
           {title}
         </Typography>
         <TouchableOpacity style={styles.arrowButton}>
@@ -130,7 +102,7 @@ const ExploreScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" backgroundColor="#FFFFFF" />
-      
+
       {/* Fixed Header Section */}
       <View style={styles.fixedHeader}>
         <View style={styles.header}>
@@ -150,12 +122,12 @@ const ExploreScreen = () => {
             </TouchableOpacity>
             <View style={styles.headerTextContainer}>
               <Typography weight="600" size={16} color={color.black_544B45}>
-                Hey {getUserFirstName()}
+                Hey Alex
               </Typography>
               <View style={styles.locationContainer}>
                 <SvgIcons.locationIcon width={12} height={12} />
                 <Typography weight="400" size={12} color={color.grey_87807C} style={styles.locationText}>
-                  {getUserLocation()}
+                  New York, USA
                 </Typography>
               </View>
             </View>
@@ -169,7 +141,7 @@ const ExploreScreen = () => {
         {/* Fixed Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <SvgIcons.searchIcon width={20} height={20} />
+            <SvgIcons.searchBarIcon width={14} height={14} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search for services, events, places"
@@ -217,7 +189,7 @@ const ExploreScreen = () => {
         {renderSection('Hot This Week', generateMockCards(5))}
         {renderSection('Trending', generateMockCards(5))}
         {/* {renderSection('Exclusive', generateMockCards(5))} */}
-        {renderSection('For You', generateMockCards(5),true)}
+        {renderSection('For You', generateMockCards(5), true)}
         {/* {renderSection('Buzzing Destinations', generateMockCards(5), true)} */}
 
         {/* Bottom padding for tab bar */}
@@ -341,7 +313,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     overflow: 'hidden',
-    minHeight: 120,
+    minHeight: 127,
   },
   inviteBannerContent: {
     flexDirection: 'row',
@@ -400,19 +372,8 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     backgroundColor: color.white_FFFFFF,
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
   },
   cardImageContainer: {
     width: '100%',
@@ -427,7 +388,7 @@ const styles = StyleSheet.create({
   cardImageWrapper: {
     width: '100%',
     height: 180,
-    borderRadius: 16,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   bookmarkButton: {

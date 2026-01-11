@@ -4,19 +4,14 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { Platform, useColorScheme } from 'react-native';
-import BoxOfficeTab from '../screens/BoxOfficeTab';
-import CheckInAllTickets from '../screens/CheckInAllTickets';
-import StaffDashboard from '../screens/dashboard/StaffDashboard';
 import GetStartedScreen from '../screens/GetStartedScreen';
 import InitialScreen from '../screens/InitialScreen';
 import LoginScreen from '../screens/LoginScreen';
-import ManualCheckInAllTickets from '../screens/ManualcheckInAllTickets';
 import MyTabs from '../screens/MyTabs';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import OtpLoginScreen from '../screens/OtpLoginScreen';
 import SplashScreenComponent from '../screens/SplashScreen';
-import TicketScanned from '../screens/TicketScanned';
-import TicketsTab from '../screens/TicketsTab';
+import SettingsScreen from '../screens/Tickets';
 
 
 const Stack = createNativeStackNavigator();
@@ -137,53 +132,8 @@ function Navigation({ route }) {
           }}
         />
         <Stack.Screen
-          name="TicketsTab"
-          component={TicketsTab}
-          options={{
-            headerShown: false,
-            unmountOnBlur: true,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen
-          name="BoxOfficeTab"
-          component={BoxOfficeTab}
-          options={{
-            headerShown: false,
-            unmountOnBlur: true,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen
-          name="CheckInAllTickets"
-          component={CheckInAllTickets}
-          options={{
-            headerShown: false,
-            unmountOnBlur: true,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen
-          name="ManualCheckInAllTickets"
-          component={ManualCheckInAllTickets}
-          options={{
-            headerShown: false,
-            unmountOnBlur: true,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen
-          name="TicketScanned"
-          component={TicketScanned}
-          options={{
-            headerShown: false,
-            unmountOnBlur: true,
-            animation: 'fade',
-          }}
-        />
-        <Stack.Screen
-          name="StaffDashboard"
-          component={StaffDashboard}
+          name="Tickets"
+          component={SettingsScreen}
           options={{
             headerShown: false,
             unmountOnBlur: true,
