@@ -4,6 +4,8 @@ import ProfileIconActive from '../assets//svgs/profile_icon_active.svg';
 import AddIcon from '../assets/svgs/add_icon.svg';
 import ArrowDown from '../assets/svgs/arrow-down.svg';
 import BackArrow from '../assets/svgs/back_arrow.svg';
+import BookmarkSelectedIcon from '../assets/svgs/bookmark_selected_icon.svg';
+import BookmarkUnselectedIcon from '../assets/svgs/bookmark_unselected_icon.svg';
 import CalendarIcon from '../assets/svgs/calendar-icon.svg';
 import CameraIconActive from '../assets/svgs/camera_icon_active.svg';
 import CameraIconInActive from '../assets/svgs/camera_icon_inactive.svg';
@@ -150,4 +152,6 @@ export default {
     favouriteIconConsumer: FavouriteIconConsumer,
     dummyImageExploreCategory: DummyImageExploreCategory,
     searchBarIcon: SearchBarIcon,
+    bookmarkSelectedIcon: BookmarkSelectedIcon,
+    bookmarkUnselectedIcon: BookmarkUnselectedIcon,
 };

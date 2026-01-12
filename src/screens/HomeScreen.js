@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import {
-  Dimensions,
   FlatList,
   Image,
   Platform,
@@ -14,20 +13,43 @@ import {
 } from 'react-native';
 import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import BuzzingCard from '../components/BuzzingCard';
+import DealCard from '../components/DealCard';
+import EventCard from '../components/EventCard';
+import ExclusiveSection from '../components/ExclusiveSection';
 import Typography from '../components/Typography';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH * 0.75; // 75% of screen width for cards
 
 // Mock data for cards - replace with actual API data later
 const generateMockCards = (count = 5) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i + 1,
-    title: `Namba’s Night ${i + 1}`,
+    title: `Namba's Night ${i + 1}`,
     date: 'June 10, 2025 • 7:00 PM',
     location: 'Namba, Osaka',
     price: '$25',
     image: null, // Add image URL later
+  }));
+};
+
+// Mock data for destination cards
+const generateDestinationCards = (count = 5) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `dest-${i + 1}`,
+    title: i === 0 ? 'Mount Fuji Trip' : 'Shibuya',
+    location: i === 0 ? 'Shizuoka' : 'Tokyo',
+    image: null,
+    showCountryCode: false,
+  }));
+};
+
+// Mock data for deal cards
+const generateDealCards = (count = 5) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `deal-${i + 1}`,
+    discount: i === 0 ? 'Upto 60% OFF' : '50%off',
+    description: i === 0 ? null : 'Our Summer Event is just around the corner, and it\'s going to be a blast. Think live music, tasty food, exciting activities',
+    backgroundColor: i === 0 ? '#F5F0E8' : '#E8E8E8',
+    image: null, // Add image URL later if needed
   }));
 };
 
@@ -42,37 +64,37 @@ const ExploreScreen = () => {
   };
 
   const renderCard = ({ item }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-      <View style={styles.cardImageContainer}>
-        <View style={styles.cardImageWrapper}>
-          <SvgIcons.dummyImageExploreCategory width="100%" height="100%" />
-        </View>
-        <TouchableOpacity style={styles.bookmarkButton} activeOpacity={0.8}>
-          <SvgIcons.favouriteIconConsumer width={24} height={24} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.cardContent}>
-        <Typography weight="700" size={16} color={color.placeholderTxt_24282C} numberOfLines={1} style={styles.cardTitle}>
-          {item.title}
-        </Typography>
-        <Typography weight="450" size={12} color={color.brown_766F6A} style={styles.cardDate}>
-          {item.date}
-        </Typography>
-        <View style={styles.cardLocationPriceRow}>
-          <Typography weight="450" size={12} color={color.brown_766F6A} style={styles.cardLocation}>
-            {item.location}
-          </Typography>
-          <View style={styles.cardPriceContainer}>
-            <Typography weight="450" size={10} color={color.grey_9F9996}>
-              from{' '}
-            </Typography>
-            <Typography weight="700" size={16} color={color.btnBrown_AE6F28}>
-              {item.price}
-            </Typography>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <EventCard
+      item={item}
+      onPress={(item) => {
+        // Handle card press - navigate to event details
+        console.log('Card pressed:', item);
+      }}
+      onBookmarkPress={(item) => {
+        // Handle bookmark press - toggle favorite
+        console.log('Bookmark pressed:', item);
+      }}
+    />
+  );
+
+  const renderDestinationCard = ({ item }) => (
+    <BuzzingCard
+      item={item}
+      onPress={(item) => {
+        // Handle destination card press - navigate to destination details
+        console.log('Destination card pressed:', item);
+      }}
+    />
+  );
+
+  const renderDealCard = ({ item }) => (
+    <DealCard
+      item={item}
+      onPress={(item) => {
+        // Handle deal card press - navigate to deal details
+        console.log('Deal card pressed:', item);
+      }}
+    />
   );
 
   const renderSection = (title, data, isLast = false) => (
@@ -90,6 +112,74 @@ const ExploreScreen = () => {
       <FlatList
         data={data}
         renderItem={renderCard}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.cardsList}
+        ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+      />
+    </View>
+  );
+
+  const renderDestinationSection = (title, data, showCountryCode = false, isLast = false) => (
+    <View style={[styles.sectionContainer, isLast && styles.lastSectionContainer]}>
+      <View style={styles.sectionHeader}>
+        <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
+          {title}
+        </Typography>
+        <TouchableOpacity style={styles.arrowButton}>
+          <Typography weight="400" size={14} color={color.black_212b34}>
+            {'>'}
+          </Typography>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={data.map(item => ({ ...item, showCountryCode }))}
+        renderItem={renderDestinationCard}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.cardsList}
+        ItemSeparatorComponent={() => <View style={styles.cardSeparator} />}
+      />
+    </View>
+  );
+
+  const renderDealSection = (title, data, timerText = null, isLast = false) => (
+    <View style={[styles.sectionContainer, isLast && styles.lastSectionContainer]}>
+      <View style={styles.sectionHeader}>
+        <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
+          {title}
+        </Typography>
+        <TouchableOpacity style={styles.arrowButton}>
+          <Typography weight="400" size={14} color={color.black_212b34}>
+            {'>'}
+          </Typography>
+        </TouchableOpacity>
+      </View>
+      {timerText && (
+        <View style={styles.timerContainer}>
+          <View style={styles.timerTextContainer}>
+            {timerText.split(/(\d+)/).map((part, index) => {
+              // Check if part is a number
+              const isNumber = /^\d+$/.test(part);
+              return (
+                <Typography 
+                  key={index}
+                  weight={isNumber ? "700" : "450"} 
+                  size={12} 
+                  color={color.red_BA1C11}
+                >
+                  {part}
+                </Typography>
+              );
+            })}
+          </View>
+        </View>
+      )}
+      <FlatList
+        data={data}
+        renderItem={renderDealCard}
         keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -188,9 +278,35 @@ const ExploreScreen = () => {
         {renderSection("Tonight's Spotlight", generateMockCards(5))}
         {renderSection('Hot This Week', generateMockCards(5))}
         {renderSection('Trending', generateMockCards(5))}
-        {/* {renderSection('Exclusive', generateMockCards(5))} */}
-        {renderSection('For You', generateMockCards(5), true)}
-        {/* {renderSection('Buzzing Destinations', generateMockCards(5), true)} */}
+
+        {/* Exclusive Section - Vertical Layout */}
+        <ExclusiveSection
+          data={generateMockCards(2)}
+          onCardPress={(item) => {
+            // Handle card press - navigate to event details
+            console.log('Exclusive card pressed:', item);
+          }}
+          onBookmarkPress={(item) => {
+            // Handle bookmark press - toggle favorite
+            console.log('Exclusive bookmark pressed:', item);
+          }}
+          onHeaderPress={() => {
+            // Handle header arrow press - navigate to all exclusive events
+            console.log('Exclusive header pressed');
+          }}
+        />
+
+        {renderSection('For You', generateMockCards(5))}
+
+        {/* Buzzing Destinations Section */}
+        {renderDestinationSection('Buzzing Destinations', generateDestinationCards(5))}
+        
+        {/* Blazing Deals Section */}
+        {renderDealSection('Blazing Deals', generateDealCards(5), 'Offer Ends: 02 days 24 hr 06 mins 19 sec')}
+        
+        {renderDestinationSection('Hidden Gems', generateMockCards(5))}
+        {renderSection('Japan’s Top 10', generateMockCards(5))}
+        {renderDestinationSection('Global Highlights', generateMockCards(5), false, true)}
 
         {/* Bottom padding for tab bar */}
         <View style={styles.bottomPadding} />
@@ -369,63 +485,14 @@ const styles = StyleSheet.create({
   cardSeparator: {
     width: 12,
   },
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: color.white_FFFFFF,
-    borderRadius: 18,
-    overflow: 'hidden',
+  timerContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    marginTop: -4,
   },
-  cardImageContainer: {
-    width: '100%',
-    height: 212, // 180 + 16 top + 16 bottom padding
-    position: 'relative',
-    backgroundColor: color.white_FFFFFF,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
-    justifyContent: 'center',
-  },
-  cardImageWrapper: {
-    width: '100%',
-    height: 180,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  bookmarkButton: {
-    position: 'absolute',
-    top: 28,
-    right: 28,
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  cardContent: {
-    padding: 16,
-    paddingTop: 12,
-  },
-  cardTitle: {
-    marginBottom: 8,
-  },
-  cardDate: {
-    marginTop: 0,
-    marginBottom: 4,
-  },
-  cardLocationPriceRow: {
+  timerTextContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  cardLocation: {
-    flex: 1,
-    marginRight: 8,
-  },
-  cardPriceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    paddingRight: 0,
+    flexWrap: 'wrap',
   },
   bottomPadding: {
     height: 20,
