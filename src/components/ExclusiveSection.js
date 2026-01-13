@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
@@ -14,7 +14,13 @@ const EXCLUSIVE_IMAGE_HEIGHT = 90;
  * ExclusiveCard Component
  * Horizontal card layout with image on left and content on right
  */
-const ExclusiveCard = ({ item, onPress, onBookmarkPress, isBookmarked, onToggleBookmark }) => {
+const ExclusiveCard = React.memo(({ 
+    item, 
+    onPress, 
+    onBookmarkPress, 
+    isBookmarked, 
+    onToggleBookmark 
+}) => {
     const handleCardPress = () => {
         if (onPress) {
             onPress(item);
@@ -22,9 +28,11 @@ const ExclusiveCard = ({ item, onPress, onBookmarkPress, isBookmarked, onToggleB
     };
 
     const handleBookmarkPress = () => {
+        // Toggle bookmark state first
         if (onToggleBookmark) {
             onToggleBookmark(item.id);
         }
+        // Then call the external callback
         if (onBookmarkPress) {
             onBookmarkPress(item);
         }
@@ -44,9 +52,15 @@ const ExclusiveCard = ({ item, onPress, onBookmarkPress, isBookmarked, onToggleB
                             source={{ uri: item.image }}
                             style={styles.cardImage}
                             resizeMode="cover"
+                            onError={(error) => {
+                                console.warn('[ExclusiveCard] Image load error:', error.nativeEvent?.error);
+                            }}
                         />
                     ) : (
-                        <SvgIcons.dummyImageExploreCategory width="100%" height="100%" />
+                        <SvgIcons.dummyImageExploreCategory 
+                            width={EXCLUSIVE_IMAGE_WIDTH} 
+                            height={EXCLUSIVE_IMAGE_HEIGHT} 
+                        />
                     )}
                 </View>
             </View>
@@ -105,43 +119,41 @@ const ExclusiveCard = ({ item, onPress, onBookmarkPress, isBookmarked, onToggleB
             </View>
         </TouchableOpacity>
     );
-};
+});
 
 /**
  * ExclusiveSection Component
  * Displays event cards in a vertical layout (stacked)
+ * Can be reused for different sections like "Exclusive" and "NearBy Events"
  * 
+ * @param {string} [title] - Section title (default: "Exclusive")
  * @param {Array} data - Array of card data objects
  * @param {Function} [onCardPress] - Optional callback when a card is pressed
  * @param {Function} [onBookmarkPress] - Optional callback when bookmark is pressed
  * @param {Function} [onHeaderPress] - Optional callback when header arrow is pressed
  */
 const ExclusiveSection = ({
+    title = "Exclusive",
     data = [],
     onCardPress,
     onBookmarkPress,
     onHeaderPress
 }) => {
-    // State to track bookmarked items
-    const [bookmarkedItems, setBookmarkedItems] = useState(new Set());
+    // State to track bookmarked items - using object instead of Set for better stability
+    const [bookmarkedItems, setBookmarkedItems] = useState({});
 
-    const handleToggleBookmark = (itemId) => {
-        setBookmarkedItems(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(itemId)) {
-                newSet.delete(itemId);
-            } else {
-                newSet.add(itemId);
-            }
-            return newSet;
-        });
-    };
+    const handleToggleBookmark = useCallback((itemId) => {
+        setBookmarkedItems(prev => ({
+            ...prev,
+            [itemId]: !prev[itemId]
+        }));
+    }, []);
 
     return (
         <View style={styles.container}>
             <View style={styles.sectionHeader}>
                 <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
-                    Exclusive
+                    {title}
                 </Typography>
                 <TouchableOpacity
                     style={styles.arrowButton}
@@ -155,23 +167,33 @@ const ExclusiveSection = ({
             </View>
 
             <View style={styles.cardsContainer}>
-                {data.map((item, index) => (
-                    <View
-                        key={item.id?.toString() || index}
-                        style={[
-                            styles.cardWrapper,
-                            index < data.length - 1 && styles.cardWrapperWithMargin
-                        ]}
-                    >
-                        <ExclusiveCard
-                            item={item}
-                            onPress={onCardPress}
-                            onBookmarkPress={onBookmarkPress}
-                            isBookmarked={bookmarkedItems.has(item.id)}
-                            onToggleBookmark={handleToggleBookmark}
-                        />
-                    </View>
-                ))}
+                {data && Array.isArray(data) && data.map((item, index) => {
+                    if (!item) {
+                        return null;
+                    }
+                    try {
+                        return (
+                            <View
+                                key={item.id?.toString() || `exclusive-${index}`}
+                                style={[
+                                    styles.cardWrapper,
+                                    index < data.length - 1 && styles.cardWrapperWithMargin
+                                ]}
+                            >
+                                <ExclusiveCard
+                                    item={item}
+                                    onPress={onCardPress}
+                                    onBookmarkPress={onBookmarkPress}
+                                    isBookmarked={!!bookmarkedItems[item.id]}
+                                    onToggleBookmark={handleToggleBookmark}
+                                />
+                            </View>
+                        );
+                    } catch (error) {
+                        console.error('[ExclusiveSection] Card render error:', error);
+                        return null;
+                    }
+                })}
             </View>
         </View>
     );
@@ -189,6 +211,7 @@ const styles = StyleSheet.create({
     },
     arrowButton: {
         marginLeft: 8,
+        padding: 4, // Better touch target
     },
     cardsContainer: {
         flexDirection: 'column',
@@ -265,4 +288,3 @@ const styles = StyleSheet.create({
 });
 
 export default ExclusiveSection;
-

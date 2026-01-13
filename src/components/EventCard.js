@@ -31,14 +31,21 @@ const HORIZONTAL_PADDING = BASE_HORIZONTAL_PADDING * SCALE_FACTOR;
  * @param {string} [item.image] - Optional image URL
  * @param {Function} [onPress] - Optional callback when card is pressed
  * @param {Function} [onBookmarkPress] - Optional callback when bookmark is pressed
+ * @param {boolean} [showBookmark=true] - Whether to show bookmark button
  * @param {Object} [style] - Optional additional styles for the card container
  */
-const EventCard = ({ 
-  item, 
-  onPress, 
+const EventCard = ({
+  item,
+  onPress,
   onBookmarkPress,
-  style 
+  showBookmark = true,
+  style
 }) => {
+  // Safety check
+  if (!item) {
+    return null;
+  }
+
   const handleCardPress = () => {
     if (onPress) {
       onPress(item);
@@ -51,55 +58,64 @@ const EventCard = ({
     }
   };
 
-  return (
-    <TouchableOpacity 
-      style={[styles.card, style]} 
+  try {
+    return (
+    <TouchableOpacity
+      style={[styles.card, style]}
       activeOpacity={0.8}
       onPress={handleCardPress}
     >
       <View style={styles.cardImageContainer}>
         <View style={styles.cardImageWrapper}>
           {item.image ? (
-            <Image 
-              source={{ uri: item.image }} 
+            <Image
+              source={{ uri: item.image }}
               style={styles.cardImage}
               resizeMode="cover"
+              onError={(error) => {
+                console.warn('[EventCard] Image load error:', error.nativeEvent?.error);
+              }}
             />
           ) : (
-            <SvgIcons.dummyImageExploreCategory width="100%" height="100%" />
+            <SvgIcons.dummyImageExploreCategory
+              width={IMAGE_WIDTH}
+              height={IMAGE_HEIGHT}
+            />
           )}
         </View>
-        <TouchableOpacity 
-          style={styles.bookmarkButton} 
-          activeOpacity={0.8}
-          onPress={handleBookmarkPress}
-        >
-          <SvgIcons.favouriteIconConsumer width={24} height={24} />
-        </TouchableOpacity>
+        {showBookmark && (
+          <TouchableOpacity
+            style={styles.bookmarkButton}
+            activeOpacity={0.8}
+            onPress={handleBookmarkPress}
+          >
+            <SvgIcons.favouriteIconConsumer width={24} height={24} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.cardContent}>
-      <Typography 
-          weight="700" 
-          size={16} 
-          color={color.placeholderTxt_24282C} 
-          numberOfLines={1} 
+        <Typography
+          weight="700"
+          size={16}
+          color={color.placeholderTxt_24282C}
+          numberOfLines={1}
           style={styles.cardTitle}
         >
           {item.title}
         </Typography>
-        <Typography 
-          weight="450" 
-          size={12} 
-          color={color.brown_766F6A} 
+        <Typography
+          weight="450"
+          size={12}
+          color={color.brown_766F6A}
           style={styles.cardDate}
         >
           {item.date}
         </Typography>
         <View style={styles.cardLocationPriceRow}>
-          <Typography 
-            weight="450" 
-            size={12} 
-            color={color.brown_766F6A} 
+          <Typography
+            weight="450"
+            size={12}
+            color={color.brown_766F6A}
             style={styles.cardLocation}
           >
             {item.location}
@@ -115,7 +131,11 @@ const EventCard = ({
         </View>
       </View>
     </TouchableOpacity>
-  );
+    );
+  } catch (error) {
+    console.error('[EventCard] Render error:', error);
+    return null;
+  }
 };
 
 const styles = StyleSheet.create({

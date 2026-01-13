@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     color: color.black_544B45,
-    backgroundColor: color.white_FFFFFF,
+    backgroundColor: "transparent",
     fontWeight: '700',
   },
   otpInputError: {
