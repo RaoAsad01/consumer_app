@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import Navigation from './src/navigation/navigation';
 import * as SplashScreen from 'expo-splash-screen';
+import React, { useCallback, useEffect, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Navigation from './src/navigation/navigation';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -43,11 +43,11 @@ function App() {
   }
 
   return (
-    <View style={{ flex: 1 }} onLayout={handleLayout}>
+    <GestureHandlerRootView style={{ flex: 1 }} onLayout={handleLayout}>
       <NavigationContainer>
         <Navigation />
       </NavigationContainer>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 

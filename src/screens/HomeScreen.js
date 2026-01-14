@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -185,6 +186,7 @@ HorizontalCardList.displayName = 'HorizontalCardList';
 // MAIN COMPONENT
 // ============================================
 const ExploreScreen = () => {
+  const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -261,7 +263,10 @@ const ExploreScreen = () => {
 
   const handleSectionPress = useCallback((sectionName) => {
     console.log('Section pressed:', sectionName);
-  }, []);
+    if (sectionName === 'Hot This Week') {
+      navigation.navigate('HotThisWeek');
+    }
+  }, [navigation]);
 
   const handleNearbyCardPress = useCallback((item) => {
     console.log('Nearby event card pressed:', item);
@@ -680,7 +685,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginBottom: 16,
   },
   searchBar: {

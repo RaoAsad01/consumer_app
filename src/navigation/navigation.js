@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import GetStartedScreen from '../screens/GetStartedScreen';
+import HotThisWeekScreen from '../screens/HotThisWeekScreen';
 import InitialScreen from '../screens/InitialScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MyTabs from '../screens/MyTabs';
@@ -19,7 +20,7 @@ const Stack = createNativeStackNavigator();
 // Brown screens that need brown navigation bar
 const brownScreens = ['Initial', 'Login', 'OtpLogin', 'GetStarted'];
 // Logged-in screens that need white navigation bar
-const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard'];
+const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard','HotThisWeek'];
 const onboardingScreens = ['Splash', 'Onboarding'];
 
 
@@ -42,7 +43,7 @@ function Navigation({ route }) {
       // Determine navigation bar color based on screen type
       if (brownScreens.includes(routeName)) {
         // Brown screens - brown navigation bar
-        NavigationBar.setBackgroundColorAsync('#D9BA95');
+        NavigationBar.setBackgroundColorAsync('#DCC3A4');
         NavigationBar.setButtonStyleAsync('dark');
       } else if (loggedInScreens.includes(routeName)) {
         // Logged-in screens - white navigation bar
@@ -138,6 +139,15 @@ function Navigation({ route }) {
             headerShown: false,
             unmountOnBlur: true,
             animation: 'fade',
+          }}
+        />
+        <Stack.Screen
+          name="HotThisWeek"
+          component={HotThisWeekScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
           }}
         />
       </Stack.Navigator>

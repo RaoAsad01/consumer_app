@@ -39,5 +39,6 @@ export const color = {
     grey_AFAFAF: "#AFAFAF",
     grey_9F9996: "#9F9996",
     red_BA1C11: "#BA1C11",
+    brown_6A3A03: "#6A3A03"
   };
   
