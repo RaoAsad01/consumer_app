@@ -13,6 +13,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import OtpLoginScreen from '../screens/OtpLoginScreen';
 import SplashScreenComponent from '../screens/SplashScreen';
 import SettingsScreen from '../screens/Tickets';
+import NearbyEventsScreen from '../screens/nearbyevents/NearbyEventsScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -20,7 +21,7 @@ const Stack = createNativeStackNavigator();
 // Brown screens that need brown navigation bar
 const brownScreens = ['Initial', 'Login', 'OtpLogin', 'GetStarted'];
 // Logged-in screens that need white navigation bar
-const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard','HotThisWeek'];
+const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard', 'HotThisWeek'];
 const onboardingScreens = ['Splash', 'Onboarding'];
 
 
@@ -144,6 +145,15 @@ function Navigation({ route }) {
         <Stack.Screen
           name="HotThisWeek"
           component={HotThisWeekScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="NearbyEvents"
+          component={NearbyEventsScreen}
           options={{
             headerShown: false,
             unmountOnBlur: true,

@@ -71,7 +71,7 @@ const ExclusiveCard = React.memo(({
                     <Typography
                         weight="450"
                         size={12}
-                        color={color.brown_766F6A}
+                        color={color.grey_87807C}
                         style={styles.cardDate}
                     >
                         {item.date}
@@ -82,9 +82,9 @@ const ExclusiveCard = React.memo(({
                         onPress={handleBookmarkPress}
                     >
                         {isBookmarked ? (
-                            <SvgIcons.bookmarkSelectedIcon width={20} height={20} />
+                            <SvgIcons.bookmarkSelectedIcon width={16} height={16} />
                         ) : (
-                            <SvgIcons.bookmarkUnselectedIcon width={20} height={20} />
+                            <SvgIcons.bookmarkUnselectedIcon width={16} height={16} />
                         )}
                     </TouchableOpacity>
                 </View>
@@ -98,6 +98,7 @@ const ExclusiveCard = React.memo(({
                     {item.title}
                 </Typography>
                 <View style={styles.cardLocationPriceRow}>
+                    <SvgIcons.locationIcon width={12} height={12} />
                     <Typography
                         weight="450"
                         size={12}
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     cardTitle: {
-        marginBottom: 8,
+        maxWidth: '90%',
         flex: 1,
     },
     cardLocationPriceRow: {
@@ -276,6 +277,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 4,
+        gap: 4,
     },
     cardLocation: {
         flex: 1,

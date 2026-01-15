@@ -50,6 +50,7 @@ import LocationIcon from '../assets/svgs/location_icon.svg';
 import ManualActiveTabSVG from '../assets/svgs/manual_active_tab.svg';
 import ManualInActiveTabSVG from '../assets/svgs/manual_inactive_tab.svg';
 import ManualInActiveTabSVGWhite from '../assets/svgs/manual_inactive_tab_white.svg';
+import MapIcon from '../assets/svgs/map_icon.svg';
 import MarketplaceInactiveBottomIcon from '../assets/svgs/marketplace-inactive-bottom-icon.svg';
 import MarketplaceActiveBottomIcon from '../assets/svgs/marketplace_active_bottomtab_icon.svg';
 import MobilityInactiveBottomIcon from '../assets/svgs/mobility-inactive-bottom-icon.svg';
@@ -61,9 +62,11 @@ import MoreActiveBottomIcon from '../assets/svgs/more_active_bottomtab_icon.svg'
 import MoviesCategoryIcon from '../assets/svgs/movies_category_icon.svg';
 import NightlifeCategoryIcon from '../assets/svgs/nightlife_category_icon.svg';
 import NoResultsIcon from '../assets/svgs/no-results-icon.svg';
+import NotificationBellIcon from '../assets/svgs/notification_bell_icon.svg';
 import OnboardingImage1 from '../assets/svgs/onboarding_image1.svg';
 import OnboardingImage2 from '../assets/svgs/onboarding_image2.svg';
 import PeopleCategoryIcon from '../assets/svgs/people_category_icon.svg';
+import PinLocationIcon from '../assets/svgs/pin_location_icon.svg';
 import PlaceholderImage from '../assets/svgs/placeholder_img.svg';
 import PlacesCategoryIcon from '../assets/svgs/places_category_icon.svg';
 import ProfileMenuIconWhite from '../assets/svgs/profile-icon-white.svg';
@@ -103,6 +106,7 @@ import UserSVG from '../assets/svgs/user.svg';
 import VirtualEventsCategoryIcon from '../assets/svgs/virtual_category_icon.svg';
 import VotingCategoryIcon from '../assets/svgs/voting_category_icon.svg';
 import VouchersCategoryIcon from '../assets/svgs/vouchers_category_icon.svg';
+import WavingHand from '../assets/svgs/waving_hand.svg';
 import WhatsappBlackIcon from '../assets/svgs/whatsapp-black-icon.svg';
 import WorkshopsCategoryIcon from '../assets/svgs/workshop_category_icon.svg';
 import WorldFairsCategoryIcon from '../assets/svgs/world_category_icon.svg';
@@ -216,4 +220,8 @@ export default {
     moreActiveBottomIcon: MoreActiveBottomIcon,
     backIcon: BackIcon,
     seacrhIconBrown: SeacrhIconBrown,
+    wavingHand: WavingHand,
+    mapIcon: MapIcon,
+    pinLocationIcon: PinLocationIcon,
+    notificationBellIcon: NotificationBellIcon,
 };

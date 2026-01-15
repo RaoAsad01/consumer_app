@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -48,15 +47,36 @@ const createDestinationCards = (count = 5) => {
   }));
 };
 
-const createDealCards = (count = 5) => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `deal-${i + 1}`,
-    title: i === 0 ? 'Deals Fuji Trip' : 'Shibuya',
-    location: i === 0 ? 'Shizuoka' : 'Tokyo',
-    image: null,
-    showCountryCode: false,
-  }));
-};
+// NEW: Blazing Deals data format
+const createBlazingDealsData = () => [
+  {
+    id: 'black-friday',
+    title: 'Black Friday Deals',
+    deals: [
+      { id: '1', title: 'Accra', date: 'June 10, 2025', time: '7:00 PM', location: 'City Hall, London', price: '$25', image: null },
+      { id: '2', title: 'Accra', date: 'June 10, 2025', time: '7:00 PM', location: 'City Hall, London', price: '$25', image: null },
+      { id: '3', title: 'Accra', date: 'June 10, 2025', time: '7:00 PM', location: 'City Hall, London', price: '$25', image: null },
+    ],
+  },
+  {
+    id: 'cyber-monday',
+    title: 'Cyber Monday',
+    deals: [
+      { id: '1', title: 'Lagos', date: 'June 12, 2025', time: '8:00 PM', location: 'Event Center, Lagos', price: '$30', image: null },
+      { id: '2', title: 'Lagos', date: 'June 12, 2025', time: '8:00 PM', location: 'Event Center, Lagos', price: '$30', image: null },
+      { id: '3', title: 'Lagos', date: 'June 12, 2025', time: '8:00 PM', location: 'Event Center, Lagos', price: '$30', image: null },
+    ],
+  },
+  {
+    id: 'flash-sale',
+    title: 'Flash Sale',
+    deals: [
+      { id: '1', title: 'Nairobi', date: 'June 15, 2025', time: '6:00 PM', location: 'Convention Hall', price: '$20', image: null },
+      { id: '2', title: 'Nairobi', date: 'June 15, 2025', time: '6:00 PM', location: 'Convention Hall', price: '$20', image: null },
+      { id: '3', title: 'Nairobi', date: 'June 15, 2025', time: '6:00 PM', location: 'Convention Hall', price: '$20', image: null },
+    ],
+  },
+];
 
 // Explore Japan categories data
 const createExploreJapanData = () => [
@@ -88,37 +108,41 @@ const SectionHeader = React.memo(({ title, onPress }) => (
 
 const CardSeparator = React.memo(() => <View style={styles.cardSeparator} />);
 
-// Timer display component - memoized to prevent unnecessary re-renders
-const TimerDisplay = React.memo(({ days, hours, mins, secs }) => (
-  <View style={styles.timerContainer}>
-    <View style={styles.timerTextContainer}>
+// NEW: Timer Box Component
+const TimerBox = React.memo(({ value, label }) => (
+  <View style={styles.timerBox}>
+    <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
+      {value}
+    </Typography>
+    <Typography weight="400" size={11} color={color.grey_87807C}>
+      {label}
+    </Typography>
+  </View>
+));
+
+// NEW: Blazing Deals Header with Timer Boxes
+const BlazingDealsHeader = React.memo(({ timer, onPress }) => (
+  <View style={styles.blazingDealsHeader}>
+    {/* Left: Title and Offer Ends */}
+    <View style={styles.blazingDealsHeaderLeft}>
+      <TouchableOpacity onPress={onPress} style={styles.blazingDealsTitleRow}>
+        <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
+          Blazing Deals
+        </Typography>
+        <Typography weight="400" size={16} color={color.placeholderTxt_24282C} style={styles.blazingDealsArrow}>
+          {' >'}
+        </Typography>
+      </TouchableOpacity>
       <Typography weight="450" size={12} color={color.red_BA1C11}>
-        Offer Ends:{' '}
+        Offer Ends:
       </Typography>
-      <Typography weight="700" size={12} color={color.red_BA1C11}>
-        {days}
-      </Typography>
-      <Typography weight="450" size={12} color={color.red_BA1C11}>
-        {' '}days{' '}
-      </Typography>
-      <Typography weight="700" size={12} color={color.red_BA1C11}>
-        {hours}
-      </Typography>
-      <Typography weight="450" size={12} color={color.red_BA1C11}>
-        {' '}hr{' '}
-      </Typography>
-      <Typography weight="700" size={12} color={color.red_BA1C11}>
-        {mins}
-      </Typography>
-      <Typography weight="450" size={12} color={color.red_BA1C11}>
-        {' '}mins{' '}
-      </Typography>
-      <Typography weight="700" size={12} color={color.red_BA1C11}>
-        {secs}
-      </Typography>
-      <Typography weight="450" size={12} color={color.red_BA1C11}>
-        {' '}sec
-      </Typography>
+    </View>
+
+    {/* Right: Timer Boxes */}
+    <View style={styles.timerBoxesContainer}>
+      <TimerBox value={timer.days} label="Days" />
+      <TimerBox value={timer.hours} label="Hours" />
+      <TimerBox value={timer.mins} label="Min" />
     </View>
   </View>
 ));
@@ -127,12 +151,10 @@ const TimerDisplay = React.memo(({ days, hours, mins, secs }) => (
 // HORIZONTAL LIST COMPONENT - Separate component to prevent re-renders
 // ============================================
 const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
-  // Safety check for data
   if (!data || !Array.isArray(data) || data.length === 0) {
     return null;
   }
 
-  // Safe key extractor with fallback
   const safeKeyExtractor = (item, index) => {
     try {
       if (keyExtractor && item) {
@@ -141,7 +163,6 @@ const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
           return String(key);
         }
       }
-      // Fallback to index if keyExtractor fails or returns null
       return `item-${index}`;
     } catch (error) {
       console.warn('[HorizontalCardList] keyExtractor error:', error);
@@ -149,7 +170,6 @@ const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
     }
   };
 
-  // Safe render item with error handling
   const safeRenderItem = ({ item, index }) => {
     try {
       if (!item) {
@@ -189,9 +209,9 @@ const ExploreScreen = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Timer state for deals countdown
-  const [timer, setTimer] = useState({ days: '02', hours: '24', mins: '06', secs: '19' });
+  const [timer, setTimer] = useState({ days: '02', hours: '06', mins: '05' });
 
   // ============================================
   // MEMOIZED DATA - Only created once
@@ -204,7 +224,7 @@ const ExploreScreen = () => {
   const exclusiveData = useMemo(() => createMockCards(2, 'exclusive'), []);
   const forYouData = useMemo(() => createMockCards(5, 'foryou'), []);
   const buzzingData = useMemo(() => createDestinationCards(5), []);
-  const dealsData = useMemo(() => createDealCards(5), []);
+  const blazingDealsData = useMemo(() => createBlazingDealsData(), []);
   const exploreJapanData = useMemo(() => createExploreJapanData(), []);
   const hiddenGemsData = useMemo(() => createMockCards(5, 'hiddengems'), []);
   const topTenData = useMemo(() => createMockCards(5, 'topten'), []);
@@ -214,31 +234,29 @@ const ExploreScreen = () => {
   // COUNTDOWN TIMER EFFECT
   // ============================================
   useEffect(() => {
-    const endTime = new Date().getTime() + (2 * 24 * 60 * 60 * 1000) + (24 * 60 * 60 * 1000);
-    
+    const endTime = new Date().getTime() + (2 * 24 * 60 * 60 * 1000) + (6 * 60 * 60 * 1000) + (5 * 60 * 1000);
+
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = endTime - now;
-      
+
       if (distance < 0) {
         clearInterval(interval);
-        setTimer({ days: '00', hours: '00', mins: '00', secs: '00' });
+        setTimer({ days: '00', hours: '00', mins: '00' });
         return;
       }
-      
+
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const secs = Math.floor((distance % (1000 * 60)) / 1000);
-      
+
       setTimer({
         days: days.toString().padStart(2, '0'),
         hours: hours.toString().padStart(2, '0'),
         mins: mins.toString().padStart(2, '0'),
-        secs: secs.toString().padStart(2, '0'),
       });
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -257,14 +275,24 @@ const ExploreScreen = () => {
     console.log('Destination pressed:', item);
   }, []);
 
-  const handleDealPress = useCallback((item) => {
-    console.log('Deal pressed:', item);
+  const handleDealPress = useCallback((deal) => {
+    console.log('Deal pressed:', deal);
+  }, []);
+
+  const handleViewAllDealsPress = useCallback((category) => {
+    console.log('View all deals pressed:', category);
   }, []);
 
   const handleSectionPress = useCallback((sectionName) => {
     console.log('Section pressed:', sectionName);
     if (sectionName === 'Hot This Week') {
       navigation.navigate('HotThisWeek');
+    }
+    else if (sectionName === 'Happening Nearby') {
+      navigation.navigate('NearbyEvents');
+    }
+    else if (sectionName === 'Blazing Deals') {
+      navigation.navigate('BlazingDeals');
     }
   }, [navigation]);
 
@@ -277,8 +305,8 @@ const ExploreScreen = () => {
   }, []);
 
   const handleNearbyHeaderPress = useCallback(() => {
-    console.log('Nearby header pressed');
-  }, []);
+    navigation.navigate('NearbyEvents');
+  }, [navigation]);
 
   const handleExclusiveCardPress = useCallback((item) => {
     console.log('Exclusive card pressed:', item);
@@ -298,6 +326,10 @@ const ExploreScreen = () => {
 
   const handleNotificationPress = useCallback(() => {
     console.log('Notification pressed');
+  }, []);
+
+  const handleLocationPress = useCallback(() => {
+    console.log('Location pressed');
   }, []);
 
   const handleFilterPress = useCallback(() => {
@@ -334,14 +366,15 @@ const ExploreScreen = () => {
     />
   ), [handleDestinationPress]);
 
+  // NEW: Render DealCard with new format
   const renderDealCard = useCallback(({ item }) => (
     <DealCard
       item={item}
       onPress={handleDealPress}
+      onViewAllPress={handleViewAllDealsPress}
     />
-  ), [handleDealPress]);
+  ), [handleDealPress, handleViewAllDealsPress]);
 
-  // Key extractor with safety check
   const keyExtractor = useCallback((item, index) => {
     if (!item) {
       return `item-${index}`;
@@ -377,15 +410,18 @@ const ExploreScreen = () => {
               )}
             </TouchableOpacity>
             <View style={styles.headerTextContainer}>
-              <Typography weight="600" size={16} color={color.black_544B45}>
-                Hey Alex
-              </Typography>
+              <View style={styles.textWithWavingHandContainer}>
+                <Typography weight="700" size={18} color={color.black_544B45}>
+                  Hey Alex
+                </Typography>
+                <SvgIcons.wavingHand width={20} height={20} style={{ marginBottom: 4 }} />
+              </View>
               <View style={styles.locationContainer}>
                 <SvgIcons.locationIcon width={12} height={12} />
-                <Typography 
-                  weight="400" 
-                  size={12} 
-                  color={color.grey_87807C} 
+                <Typography
+                  weight="400"
+                  size={12}
+                  color={color.grey_87807C}
                   style={styles.locationText}
                 >
                   New York, USA
@@ -393,13 +429,22 @@ const ExploreScreen = () => {
               </View>
             </View>
           </View>
-          <TouchableOpacity 
-            style={styles.notificationButton}
-            onPress={handleNotificationPress}
-          >
-            <Ionicons name="notifications-outline" size={24} color={color.black_544B45} />
-            <View style={styles.notificationDot} />
-          </TouchableOpacity>
+
+          {/* Right side icons - same row, aligned at the end */}
+          <View style={styles.headerRightIcons}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleLocationPress}
+            >
+              <SvgIcons.pinLocationIcon width={24} height={24} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleNotificationPress}
+            >
+              <SvgIcons.notificationBellIcon width={24} height={24} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Fixed Search Bar */}
@@ -437,16 +482,16 @@ const ExploreScreen = () => {
               <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
                 Invite your friends
               </Typography>
-              <Typography 
-                weight="450" 
-                size={13} 
-                color={color.brown_766F6A} 
+              <Typography
+                weight="450"
+                size={13}
+                color={color.brown_766F6A}
                 style={styles.inviteSubtitle}
               >
                 Get $20 for ticket
               </Typography>
-              <TouchableOpacity 
-                style={styles.inviteButton} 
+              <TouchableOpacity
+                style={styles.inviteButton}
                 activeOpacity={0.8}
                 onPress={handleInvitePress}
               >
@@ -461,15 +506,6 @@ const ExploreScreen = () => {
           </View>
         </View>
 
-        {/* NearBy Events Section */}
-        <ExclusiveSection
-          title="Nearby Events"
-          data={nearbyEventsData}
-          onCardPress={handleNearbyCardPress}
-          onBookmarkPress={handleNearbyBookmarkPress}
-          onHeaderPress={handleNearbyHeaderPress}
-        />
-
         {/* Upcoming Section */}
         <View style={styles.sectionContainer}>
           <SectionHeader title="Upcoming" onPress={() => handleSectionPress('Upcoming')} />
@@ -479,6 +515,37 @@ const ExploreScreen = () => {
             keyExtractor={keyExtractor}
           />
         </View>
+
+        {/* NearBy Events Section */}
+        <ExclusiveSection
+          title="Happening Nearby"
+          data={nearbyEventsData}
+          onCardPress={handleNearbyCardPress}
+          onBookmarkPress={handleNearbyBookmarkPress}
+          onHeaderPress={handleNearbyHeaderPress}
+        />
+
+        {/* NEW: Blazing Deals Section with Timer Boxes */}
+        <View style={styles.sectionContainer}>
+          <BlazingDealsHeader
+            timer={timer}
+            onPress={() => handleSectionPress('Blazing Deals')}
+          />
+          <HorizontalCardList
+            data={blazingDealsData}
+            renderItem={renderDealCard}
+            keyExtractor={keyExtractor}
+          />
+        </View>
+
+        {/* Exclusive Section */}
+        <ExclusiveSection
+          title="Exclusive"
+          data={exclusiveData}
+          onCardPress={handleExclusiveCardPress}
+          onBookmarkPress={handleExclusiveBookmarkPress}
+          onHeaderPress={handleExclusiveHeaderPress}
+        />
 
         {/* Tonight's Spotlight Section */}
         <View style={styles.sectionContainer}>
@@ -500,89 +567,65 @@ const ExploreScreen = () => {
           />
         </View>
 
-        {/* Trending Section */}
-        <View style={styles.sectionContainer}>
-          <SectionHeader title="Trending" onPress={() => handleSectionPress('Trending')} />
-          <HorizontalCardList
-            data={trendingData}
-            renderItem={renderEventCard}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-
-        {/* Exclusive Section */}
-        <ExclusiveSection
-          title="Exclusive"
-          data={exclusiveData}
-          onCardPress={handleExclusiveCardPress}
-          onBookmarkPress={handleExclusiveBookmarkPress}
-          onHeaderPress={handleExclusiveHeaderPress}
-        />
-
         {/* For You Section */}
-        <View style={styles.sectionContainer}>
-          <SectionHeader title="For You" onPress={() => handleSectionPress('For You')} />
-          <HorizontalCardList
-            data={forYouData}
-            renderItem={renderEventCard}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-
-        {/* Buzzing Destinations Section */}
-        <View style={styles.sectionContainer}>
-          <SectionHeader title="Buzzing Destinations" onPress={() => handleSectionPress('Buzzing Destinations')} />
-          <HorizontalCardList
-            data={buzzingData}
-            renderItem={renderBuzzingCard}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-
-        {/* Blazing Deals Section */}
-        <View style={styles.sectionContainer}>
-          <SectionHeader title="Blazing Deals" onPress={() => handleSectionPress('Blazing Deals')} />
-          <TimerDisplay 
-            days={timer.days}
-            hours={timer.hours}
-            mins={timer.mins}
-            secs={timer.secs}
-          />
-          <HorizontalCardList
-            data={dealsData}
-            renderItem={renderDealCard}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-
-        {/* Hidden Gems Section */}
-        <View style={styles.sectionContainer}>
-          <SectionHeader title="Hidden Gems" onPress={() => handleSectionPress('Hidden Gems')} />
-          <HorizontalCardList
-            data={hiddenGemsData}
-            renderItem={renderBuzzingCard}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-
-        {/* Grouped Japan Section (Explore Japan + Japan's Top 10) */}
         <View style={styles.japanGroupedContainer}>
-          {/* Explore Japan - Masonry Grid */}
-          <ExploreSectionHomePage
-            title="Explore Japan"
-            data={exploreJapanData}
-            onCardPress={handleExploreJapanPress}
-          />
-          
-          {/* Japan's Top 10 - Horizontal List */}
-          <View style={styles.topTenSection}>
-            <SectionHeader title="Japan's Top 10" onPress={() => handleSectionPress("Japan's Top 10")} />
+          <View style={styles.sectionContainer}>
+            <SectionHeader title="For You" onPress={() => handleSectionPress('For You')} />
             <HorizontalCardList
-              data={topTenData}
-              renderItem={renderEventCardNoBookmark}
+              data={forYouData}
+              renderItem={renderEventCard}
               keyExtractor={keyExtractor}
             />
           </View>
+
+          {/* Trending Section */}
+          <View style={styles.sectionContainer}>
+            <SectionHeader title="Trending" onPress={() => handleSectionPress('Trending')} />
+            <HorizontalCardList
+              data={trendingData}
+              renderItem={renderEventCard}
+              keyExtractor={keyExtractor}
+            />
+          </View>
+
+          {/* Buzzing Destinations Section */}
+          <View style={styles.sectionContainer}>
+            <SectionHeader title="Buzzing Destinations" onPress={() => handleSectionPress('Buzzing Destinations')} />
+            <HorizontalCardList
+              data={buzzingData}
+              renderItem={renderBuzzingCard}
+              keyExtractor={keyExtractor}
+            />
+          </View>
+
+          {/* Hidden Gems Section */}
+          <View style={styles.sectionContainer}>
+            <SectionHeader title="Hidden Gems" onPress={() => handleSectionPress('Hidden Gems')} />
+            <HorizontalCardList
+              data={hiddenGemsData}
+              renderItem={renderBuzzingCard}
+              keyExtractor={keyExtractor}
+            />
+          </View>
+        </View>
+
+        {/* Grouped Japan Section (Explore Japan + Japan's Top 10) */}
+
+        {/* Explore Japan - Masonry Grid */}
+        <ExploreSectionHomePage
+          title="Explore Japan"
+          data={exploreJapanData}
+          onCardPress={handleExploreJapanPress}
+        />
+
+        {/* Japan's Top 10 - Horizontal List */}
+        <View style={styles.topTenSection}>
+          <SectionHeader title="Japan's Top 10" onPress={() => handleSectionPress("Japan's Top 10")} />
+          <HorizontalCardList
+            data={topTenData}
+            renderItem={renderEventCardNoBookmark}
+            keyExtractor={keyExtractor}
+          />
         </View>
 
         {/* Global Highlights Section */}
@@ -608,11 +651,9 @@ const ExploreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
   },
   fixedHeader: {
-    backgroundColor: '#F5F5F5',
-    paddingTop: Platform.OS === 'ios' ? 50 : Platform.OS === 'android' ? 40 : 0,
+    paddingTop: Platform.OS === 'ios' ? 50 : Platform.OS === 'android' ? 30 : 0,
     zIndex: 10,
   },
   header: {
@@ -656,6 +697,10 @@ const styles = StyleSheet.create({
   headerTextContainer: {
     flex: 1,
   },
+  textWithWavingHandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -665,23 +710,16 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     flex: 1,
   },
-  notificationButton: {
-    width: 40,
+  // Right side icons container - same row
+  headerRightIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    width: 25,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: color.red_FF0000,
-    borderWidth: 1.5,
-    borderColor: color.white_FFFFFF,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -700,7 +738,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '400',
     color: color.black_212b34,
     marginLeft: 12,
@@ -777,14 +815,42 @@ const styles = StyleSheet.create({
   cardSeparator: {
     width: 12,
   },
-  timerContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    marginTop: -4,
-  },
-  timerTextContainer: {
+  // NEW: Blazing Deals Header Styles
+  blazingDealsHeader: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  blazingDealsHeaderLeft: {
+    flex: 1,
+  },
+  blazingDealsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  blazingDealsArrow: {
+    marginLeft: 4,
+  },
+  timerBoxesContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  timerBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   japanGroupedContainer: {
     backgroundColor: color.lightBrown_FFF6DF,
@@ -794,6 +860,7 @@ const styles = StyleSheet.create({
   },
   topTenSection: {
     marginTop: 24,
+    marginBottom: 14,
   },
   bottomPadding: {
     height: 20,
