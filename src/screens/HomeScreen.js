@@ -47,7 +47,7 @@ const createDestinationCards = (count = 5) => {
   }));
 };
 
-// NEW: Blazing Deals data format
+// Blazing Deals data - IDs MUST match the tab IDs in BlazingDealsScreen
 const createBlazingDealsData = () => [
   {
     id: 'black-friday',
@@ -108,7 +108,7 @@ const SectionHeader = React.memo(({ title, onPress }) => (
 
 const CardSeparator = React.memo(() => <View style={styles.cardSeparator} />);
 
-// NEW: Timer Box Component
+// Timer Box Component
 const TimerBox = React.memo(({ value, label }) => (
   <View style={styles.timerBox}>
     <Typography weight="700" size={18} color={color.placeholderTxt_24282C}>
@@ -120,7 +120,7 @@ const TimerBox = React.memo(({ value, label }) => (
   </View>
 ));
 
-// NEW: Blazing Deals Header with Timer Boxes
+// Blazing Deals Header with Timer Boxes
 const BlazingDealsHeader = React.memo(({ timer, onPress }) => (
   <View style={styles.blazingDealsHeader}>
     {/* Left: Title and Offer Ends */}
@@ -148,7 +148,7 @@ const BlazingDealsHeader = React.memo(({ timer, onPress }) => (
 ));
 
 // ============================================
-// HORIZONTAL LIST COMPONENT - Separate component to prevent re-renders
+// HORIZONTAL LIST COMPONENT
 // ============================================
 const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
   if (!data || !Array.isArray(data) || data.length === 0) {
@@ -279,9 +279,11 @@ const ExploreScreen = () => {
     console.log('Deal pressed:', deal);
   }, []);
 
+  // Navigate to BlazingDealsScreen with specific tab when "View All Offers" is pressed
   const handleViewAllDealsPress = useCallback((category) => {
     console.log('View all deals pressed:', category);
-  }, []);
+    navigation.navigate('BlazingDealDetail', { initialTab: category.id });
+  }, [navigation]);
 
   const handleSectionPress = useCallback((sectionName) => {
     console.log('Section pressed:', sectionName);
@@ -292,7 +294,7 @@ const ExploreScreen = () => {
       navigation.navigate('NearbyEvents');
     }
     else if (sectionName === 'Blazing Deals') {
-      navigation.navigate('BlazingDeals');
+      navigation.navigate('BlazingDealDetail');
     }
   }, [navigation]);
 
@@ -343,11 +345,23 @@ const ExploreScreen = () => {
   // ============================================
   // MEMOIZED RENDER FUNCTIONS
   // ============================================
+  
+  // Standard EventCard with price
   const renderEventCard = useCallback(({ item }) => (
     <EventCard
       item={item}
       onPress={handleCardPress}
       onBookmarkPress={handleBookmarkPress}
+    />
+  ), [handleCardPress, handleBookmarkPress]);
+
+  // EventCard with "View Details >" for Upcoming section
+  const renderUpcomingCard = useCallback(({ item }) => (
+    <EventCard
+      item={item}
+      onPress={handleCardPress}
+      onBookmarkPress={handleBookmarkPress}
+      showViewDetails={true}
     />
   ), [handleCardPress, handleBookmarkPress]);
 
@@ -366,7 +380,7 @@ const ExploreScreen = () => {
     />
   ), [handleDestinationPress]);
 
-  // NEW: Render DealCard with new format
+  // Render DealCard - onViewAllPress navigates to specific tab
   const renderDealCard = useCallback(({ item }) => (
     <DealCard
       item={item}
@@ -430,7 +444,7 @@ const ExploreScreen = () => {
             </View>
           </View>
 
-          {/* Right side icons - same row, aligned at the end */}
+          {/* Right side icons */}
           <View style={styles.headerRightIcons}>
             <TouchableOpacity
               style={styles.iconButton}
@@ -506,12 +520,12 @@ const ExploreScreen = () => {
           </View>
         </View>
 
-        {/* Upcoming Section */}
+        {/* Upcoming Section - Uses "View Details >" instead of price */}
         <View style={styles.sectionContainer}>
           <SectionHeader title="Upcoming" onPress={() => handleSectionPress('Upcoming')} />
           <HorizontalCardList
             data={upcomingData}
-            renderItem={renderEventCard}
+            renderItem={renderUpcomingCard}
             keyExtractor={keyExtractor}
           />
         </View>
@@ -525,7 +539,7 @@ const ExploreScreen = () => {
           onHeaderPress={handleNearbyHeaderPress}
         />
 
-        {/* NEW: Blazing Deals Section with Timer Boxes */}
+        {/* Blazing Deals Section with Timer Boxes */}
         <View style={styles.sectionContainer}>
           <BlazingDealsHeader
             timer={timer}
@@ -608,8 +622,6 @@ const ExploreScreen = () => {
             />
           </View>
         </View>
-
-        {/* Grouped Japan Section (Explore Japan + Japan's Top 10) */}
 
         {/* Explore Japan - Masonry Grid */}
         <ExploreSectionHomePage
@@ -710,14 +722,13 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     flex: 1,
   },
-  // Right side icons container - same row
   headerRightIcons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconButton: {
-    width: 25,
-    height: 40,
+    width: 26,
+    height: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -815,7 +826,7 @@ const styles = StyleSheet.create({
   cardSeparator: {
     width: 12,
   },
-  // NEW: Blazing Deals Header Styles
+  // Blazing Deals Header Styles
   blazingDealsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

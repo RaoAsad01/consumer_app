@@ -7,6 +7,7 @@ import ArrowDown from '../assets/svgs/arrow-down.svg';
 import AuditionsCategoryIcon from '../assets/svgs/auditions_category_icon.svg';
 import BackArrow from '../assets/svgs/back_arrow.svg';
 import BackIcon from '../assets/svgs/back_icon.svg';
+import NotificationBellIcon from '../assets/svgs/bell_notification_icon.svg';
 import BookmarkSelectedIcon from '../assets/svgs/bookmark_selected_icon.svg';
 import BookmarkUnselectedIcon from '../assets/svgs/bookmark_unselected_icon.svg';
 import CalendarIcon from '../assets/svgs/calendar-icon.svg';
@@ -47,6 +48,7 @@ import IllustrationSplashImage from '../assets/svgs/Illustration_splash_image.sv
 import IndulgeCategoryIcon from '../assets/svgs/indulge_category_icon.svg';
 import InviteGiftImage from '../assets/svgs/invite_gift_image.svg';
 import LocationIcon from '../assets/svgs/location_icon.svg';
+import PinLocationIcon from '../assets/svgs/location_pin_icon.svg';
 import ManualActiveTabSVG from '../assets/svgs/manual_active_tab.svg';
 import ManualInActiveTabSVG from '../assets/svgs/manual_inactive_tab.svg';
 import ManualInActiveTabSVGWhite from '../assets/svgs/manual_inactive_tab_white.svg';
@@ -62,11 +64,9 @@ import MoreActiveBottomIcon from '../assets/svgs/more_active_bottomtab_icon.svg'
 import MoviesCategoryIcon from '../assets/svgs/movies_category_icon.svg';
 import NightlifeCategoryIcon from '../assets/svgs/nightlife_category_icon.svg';
 import NoResultsIcon from '../assets/svgs/no-results-icon.svg';
-import NotificationBellIcon from '../assets/svgs/notification_bell_icon.svg';
 import OnboardingImage1 from '../assets/svgs/onboarding_image1.svg';
 import OnboardingImage2 from '../assets/svgs/onboarding_image2.svg';
 import PeopleCategoryIcon from '../assets/svgs/people_category_icon.svg';
-import PinLocationIcon from '../assets/svgs/pin_location_icon.svg';
 import PlaceholderImage from '../assets/svgs/placeholder_img.svg';
 import PlacesCategoryIcon from '../assets/svgs/places_category_icon.svg';
 import ProfileMenuIconWhite from '../assets/svgs/profile-icon-white.svg';

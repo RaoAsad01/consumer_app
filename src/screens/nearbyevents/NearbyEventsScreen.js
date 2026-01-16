@@ -32,7 +32,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Bottom sheet positions
 const SHEET_MIN_HEIGHT = 320;
-const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.8;
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.7;
 
 // ============ Data ============
 const CATEGORIES = [
@@ -140,6 +140,28 @@ const INITIAL_REGION = {
 
 // ============ Components ============
 
+// Header Component - Fixed centering with 3 elements
+const Header = ({ onBackPress }) => {
+  return (
+    <View style={styles.header}>
+      <TouchableOpacity
+        onPress={onBackPress}
+        style={styles.headerButton}
+        activeOpacity={0.7}
+      >
+        <SvgIcons.backIcon width={20} height={20} />
+      </TouchableOpacity>
+
+      <Typography weight="700" size={18} color={color.brown_3C200A}>
+        Happening Nearby
+      </Typography>
+
+      {/* Empty placeholder to balance the header and center the title */}
+      <View style={styles.headerPlaceholder} />
+    </View>
+  );
+};
+
 // Category Tab
 const CategoryTab = ({ item, isActive, onPress }) => (
   <TouchableOpacity
@@ -201,7 +223,7 @@ const EventListItem = ({ item, onPress, onBookmarkPress }) => (
       </View>
 
       <Typography
-        weight="600"
+        weight="700"
         size={15}
         color={color.placeholderTxt_24282C}
         style={styles.eventTitle}
@@ -243,6 +265,7 @@ const NearbyEventsScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [events, setEvents] = useState(NEARBY_EVENTS);
   const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+  const [mapError, setMapError] = useState(null);
   const mapRef = useRef(null);
   const flatListRef = useRef(null);
 
@@ -274,6 +297,10 @@ const NearbyEventsScreen = ({ navigation }) => {
     );
   }, []);
 
+  const handleBackPress = () => {
+    navigation?.goBack();
+  };
+
   const handleFilterPress = useCallback(() => {
     console.log('Filter pressed');
   }, []);
@@ -298,21 +325,18 @@ const NearbyEventsScreen = ({ navigation }) => {
       const midPoint = SCREEN_HEIGHT - (SHEET_MIN_HEIGHT + SHEET_MAX_HEIGHT) / 2;
 
       if (velocity > 500) {
-        // Fast swipe down - collapse
         translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MIN_HEIGHT, {
           damping: 20,
           stiffness: 200,
         });
         runOnJS(updateSheetState)(false);
       } else if (velocity < -500) {
-        // Fast swipe up - expand
         translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, {
           damping: 20,
           stiffness: 200,
         });
         runOnJS(updateSheetState)(true);
       } else {
-        // Position based
         if (translateY.value < midPoint) {
           translateY.value = withSpring(SCREEN_HEIGHT - SHEET_MAX_HEIGHT, {
             damping: 20,
@@ -346,7 +370,6 @@ const NearbyEventsScreen = ({ navigation }) => {
     }
   });
 
-  // Combine gestures for handle
   const combinedGesture = Gesture.Race(panGesture, tapGesture);
 
   const animatedSheetStyle = useAnimatedStyle(() => ({
@@ -368,8 +391,11 @@ const NearbyEventsScreen = ({ navigation }) => {
     <GestureHandlerRootView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Search Bar */}
       <SafeAreaView edges={['top']} style={styles.searchWrapper}>
+        {/* Header - Now properly centered */}
+        <Header onBackPress={handleBackPress} />
+
+        {/* Search Container - Reduced top padding */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
             <SvgIcons.seacrhIconBrown width={14} height={14} />
@@ -412,27 +438,49 @@ const NearbyEventsScreen = ({ navigation }) => {
 
       {/* Map View */}
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          provider={PROVIDER_GOOGLE}
-          initialRegion={INITIAL_REGION}
-          showsUserLocation
-          showsMyLocationButton={false}
-        >
-          {MAP_MARKERS.map((marker) => (
-            <Marker
-              key={marker.id}
-              coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
-              }}
-              onPress={() => handleMarkerPress(marker)}
-            >
-              <PriceMarker price={marker.price} />
-            </Marker>
-          ))}
-        </MapView>
+        {mapError ? (
+          <View style={styles.mapErrorContainer}>
+            <Typography weight="600" size={14} color={color.grey_87807C} style={styles.mapErrorText}>
+              {mapError}
+            </Typography>
+            <Typography weight="400" size={12} color={color.grey_87807C} style={styles.mapErrorSubtext}>
+              Please configure Google Maps API key
+            </Typography>
+          </View>
+        ) : (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            provider={PROVIDER_GOOGLE}
+            initialRegion={INITIAL_REGION}
+            showsUserLocation
+            showsMyLocationButton={false}
+            onMapReady={() => {
+              setMapError(null);
+            }}
+            onError={(error) => {
+              console.warn('MapView Error:', error);
+              if (error.nativeEvent?.message) {
+                setMapError(error.nativeEvent.message);
+              } else {
+                setMapError('Unable to load map. Please check your Google Maps API key configuration.');
+              }
+            }}
+          >
+            {MAP_MARKERS.map((marker) => (
+              <Marker
+                key={marker.id}
+                coordinate={{
+                  latitude: marker.latitude,
+                  longitude: marker.longitude,
+                }}
+                onPress={() => handleMarkerPress(marker)}
+              >
+                <PriceMarker price={marker.price} />
+              </Marker>
+            ))}
+          </MapView>
+        )}
 
         {/* My Location Button */}
         <TouchableOpacity
@@ -446,20 +494,17 @@ const NearbyEventsScreen = ({ navigation }) => {
 
       {/* Bottom Sheet */}
       <Animated.View style={[styles.bottomSheet, animatedSheetStyle]}>
-        {/* Draggable Handle Area - Only this area responds to pan gesture */}
         <GestureDetector gesture={combinedGesture}>
           <View style={styles.sheetHandleArea}>
             <View style={styles.handleBar} />
-            {/* Events Count */}
             <View style={styles.eventsCountContainer}>
-              <Typography weight="600" size={16} color={color.placeholderTxt_24282C}>
+              <Typography weight="700" size={16} color={color.black_0A0A0A}>
                 {events.length} Nearby Events
               </Typography>
             </View>
           </View>
         </GestureDetector>
 
-        {/* Scrollable Events List - Independent scrolling */}
         <FlatList
           ref={flatListRef}
           data={events}
@@ -486,11 +531,32 @@ const styles = StyleSheet.create({
   searchWrapper: {
     backgroundColor: '#FFFFFF',
     zIndex: 10,
+    paddingTop: 16,
   },
+  // Header - Fixed for proper centering
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: color.white_FFFFFF,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Empty placeholder to balance the header (same width as back button)
+  headerPlaceholder: {
+    width: 40,
+    height: 40,
+  },
+  // Search Container - Reduced top padding from 40 to 8
   searchContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingTop: 40,
     paddingBottom: 12,
   },
   searchBar: {
@@ -546,6 +612,20 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  mapErrorContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  mapErrorText: {
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  mapErrorSubtext: {
+    textAlign: 'center',
   },
   myLocationButton: {
     position: 'absolute',
@@ -614,13 +694,16 @@ const styles = StyleSheet.create({
   handleBar: {
     width: 40,
     height: 4,
-    backgroundColor: '#D9D9D9',
+    backgroundColor: color.grey_DEDCDC,
     borderRadius: 2,
     marginBottom: 16,
   },
   eventsCountContainer: {
     paddingHorizontal: 20,
     paddingBottom: 8,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   eventsList: {
     paddingHorizontal: 16,
@@ -630,24 +713,15 @@ const styles = StyleSheet.create({
     height: 16,
   },
   listFooter: {
-    height: 200, // Extra padding at the bottom to see all items
+    height: 200,
   },
   eventItem: {
     flexDirection: 'row',
-    backgroundColor: color.white_FFFFFF || '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    backgroundColor: color.grey_FCFCFC,
+    borderColor: color.grey_F6F6F6,
+    borderWidth: 1,
   },
   eventImageContainer: {
     width: 90,
@@ -669,13 +743,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    paddingTop: 4,
   },
   bookmarkButton: {
     padding: 2,
   },
   eventTitle: {
-    marginTop: 2,
-    marginBottom: 4,
+    marginBottom: 12,
+    maxWidth: '80%',
   },
   eventFooter: {
     flexDirection: 'row',

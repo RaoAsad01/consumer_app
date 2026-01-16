@@ -32,6 +32,7 @@ const HORIZONTAL_PADDING = BASE_HORIZONTAL_PADDING * SCALE_FACTOR;
  * @param {Function} [onPress] - Optional callback when card is pressed
  * @param {Function} [onBookmarkPress] - Optional callback when bookmark is pressed
  * @param {boolean} [showBookmark=true] - Whether to show bookmark button
+ * @param {boolean} [showViewDetails=false] - Whether to show "View Details >" instead of price
  * @param {Object} [style] - Optional additional styles for the card container
  */
 const EventCard = ({
@@ -39,6 +40,7 @@ const EventCard = ({
   onPress,
   onBookmarkPress,
   showBookmark = true,
+  showViewDetails = false,
   style
 }) => {
   // Safety check
@@ -60,77 +62,92 @@ const EventCard = ({
 
   try {
     return (
-    <TouchableOpacity
-      style={[styles.card, style]}
-      activeOpacity={0.8}
-      onPress={handleCardPress}
-    >
-      <View style={styles.cardImageContainer}>
-        <View style={styles.cardImageWrapper}>
-          {item.image ? (
-            <Image
-              source={{ uri: item.image }}
-              style={styles.cardImage}
-              resizeMode="cover"
-              onError={(error) => {
-                console.warn('[EventCard] Image load error:', error.nativeEvent?.error);
-              }}
-            />
-          ) : (
-            <SvgIcons.dummyImageExploreCategory
-              width={IMAGE_WIDTH}
-              height={IMAGE_HEIGHT}
-            />
+      <TouchableOpacity
+        style={[styles.card, style]}
+        activeOpacity={0.8}
+        onPress={handleCardPress}
+      >
+        <View style={styles.cardImageContainer}>
+          <View style={styles.cardImageWrapper}>
+            {item.image ? (
+              <Image
+                source={{ uri: item.image }}
+                style={styles.cardImage}
+                resizeMode="cover"
+                onError={(error) => {
+                  console.warn('[EventCard] Image load error:', error.nativeEvent?.error);
+                }}
+              />
+            ) : (
+              <SvgIcons.dummyImageExploreCategory
+                width={IMAGE_WIDTH}
+                height={IMAGE_HEIGHT}
+              />
+            )}
+          </View>
+          {showBookmark && (
+            <TouchableOpacity
+              style={styles.bookmarkButton}
+              activeOpacity={0.8}
+              onPress={handleBookmarkPress}
+            >
+              <SvgIcons.favouriteIconConsumer width={24} height={24} />
+            </TouchableOpacity>
           )}
         </View>
-        {showBookmark && (
-          <TouchableOpacity
-            style={styles.bookmarkButton}
-            activeOpacity={0.8}
-            onPress={handleBookmarkPress}
+        <View style={styles.cardContent}>
+          <Typography
+            weight="700"
+            size={16}
+            color={color.placeholderTxt_24282C}
+            numberOfLines={1}
+            style={styles.cardTitle}
           >
-            <SvgIcons.favouriteIconConsumer width={24} height={24} />
-          </TouchableOpacity>
-        )}
-      </View>
-      <View style={styles.cardContent}>
-        <Typography
-          weight="700"
-          size={16}
-          color={color.placeholderTxt_24282C}
-          numberOfLines={1}
-          style={styles.cardTitle}
-        >
-          {item.title}
-        </Typography>
-        <Typography
-          weight="450"
-          size={12}
-          color={color.brown_766F6A}
-          style={styles.cardDate}
-        >
-          {item.date}
-        </Typography>
-        <View style={styles.cardLocationPriceRow}>
+            {item.title}
+          </Typography>
           <Typography
             weight="450"
             size={12}
             color={color.brown_766F6A}
-            style={styles.cardLocation}
+            style={styles.cardDate}
           >
-            {item.location}
+            {item.date}
           </Typography>
-          <View style={styles.cardPriceContainer}>
-            <Typography weight="450" size={10} color={color.grey_9F9996}>
-              from{' '}
+          <View style={styles.cardLocationPriceRow}>
+            <SvgIcons.locationIcon width={14} height={14} />
+            <Typography
+              weight="450"
+              size={12}
+              color={color.brown_766F6A}
+              style={styles.cardLocation}
+              numberOfLines={1}
+            >
+              {item.location}
             </Typography>
-            <Typography weight="700" size={16} color={color.btnBrown_AE6F28}>
-              {item.price}
-            </Typography>
+            
+            {/* Conditional rendering: View Details or Price */}
+            {showViewDetails ? (
+              <View style={styles.viewDetailsContainer}>
+                <Typography weight="500" size={14} color={color.btnBrown_AE6F28}>
+                  View Details
+                </Typography>
+                <Typography weight="500" size={14} color={color.btnBrown_AE6F28}>
+                  {' >'}
+                </Typography>
+              </View>
+            ) : (
+              <View style={styles.cardPriceContainer}>
+                <Typography weight="450" size={10} color={color.grey_9F9996}>
+                  from{' '}
+                </Typography>
+                <Typography weight="700" size={16} color={color.btnBrown_AE6F28}>
+                  {item.price}
+                </Typography>
+              </View>
+            )}
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
     );
   } catch (error) {
     console.error('[EventCard] Render error:', error);
@@ -148,11 +165,11 @@ const styles = StyleSheet.create({
   },
   cardImageContainer: {
     width: '100%',
-    height: IMAGE_HEIGHT + 10 * SCALE_FACTOR, // Image height + top padding (10px scaled)
+    height: IMAGE_HEIGHT + 10 * SCALE_FACTOR,
     position: 'relative',
     backgroundColor: color.white_FFFFFF,
-    paddingHorizontal: HORIZONTAL_PADDING, // 10px scaled
-    paddingTop: 10 * SCALE_FACTOR, // 10px top padding scaled
+    paddingHorizontal: HORIZONTAL_PADDING,
+    paddingTop: 10 * SCALE_FACTOR,
     paddingBottom: 0,
     justifyContent: 'flex-start',
   },
@@ -168,8 +185,8 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     position: 'absolute',
-    top: 10 * SCALE_FACTOR + 10, // Top padding + small offset
-    right: HORIZONTAL_PADDING + 10, // Right padding + small offset
+    top: 10 * SCALE_FACTOR + 10,
+    right: HORIZONTAL_PADDING + 10,
     width: 32,
     height: 32,
     justifyContent: 'center',
@@ -194,6 +211,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 12,
+    gap: 4,
   },
   cardLocation: {
     flex: 1,
@@ -204,10 +222,14 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     paddingRight: 0,
   },
+  // New style for View Details
+  viewDetailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
 
-// Export dimensions for use in other components (e.g., for FlatList itemSeparator)
+// Export dimensions for use in other components
 export { CARD_HEIGHT, CARD_WIDTH };
 
 export default EventCard;
-

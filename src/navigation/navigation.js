@@ -13,6 +13,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import OtpLoginScreen from '../screens/OtpLoginScreen';
 import SplashScreenComponent from '../screens/SplashScreen';
 import SettingsScreen from '../screens/Tickets';
+import BlazingDealDetailScreen from '../screens/blazingdealdetail/BlazingDealDetailScreen';
 import NearbyEventsScreen from '../screens/nearbyevents/NearbyEventsScreen';
 
 
@@ -21,7 +22,7 @@ const Stack = createNativeStackNavigator();
 // Brown screens that need brown navigation bar
 const brownScreens = ['Initial', 'Login', 'OtpLogin', 'GetStarted'];
 // Logged-in screens that need white navigation bar
-const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard', 'HotThisWeek'];
+const loggedInScreens = ['LoggedIn', 'TicketsTab', 'BoxOfficeTab', 'CheckInAllTickets', 'ManualCheckInAllTickets', 'TicketScanned', 'StaffDashboard'];
 const onboardingScreens = ['Splash', 'Onboarding'];
 
 
@@ -56,8 +57,8 @@ function Navigation({ route }) {
         NavigationBar.setButtonStyleAsync('dark');
       } else {
         // Default - dark navigation bar
-        NavigationBar.setBackgroundColorAsync('#281c10');
-        NavigationBar.setButtonStyleAsync('light');
+        NavigationBar.setBackgroundColorAsync('#fff');
+        NavigationBar.setButtonStyleAsync('dark');
       }
     }
   }, [routeName, scheme]);
@@ -154,6 +155,15 @@ function Navigation({ route }) {
         <Stack.Screen
           name="NearbyEvents"
           component={NearbyEventsScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="BlazingDealDetail"
+          component={BlazingDealDetailScreen}
           options={{
             headerShown: false,
             unmountOnBlur: true,
