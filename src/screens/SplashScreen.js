@@ -10,8 +10,9 @@ import {
   Text,
   View,
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from '../components/SvgIcons';
+import logger from '../utils/logger';
 
 const { width, height } = Dimensions.get('window');
 const IMAGE_HEIGHT = height * 0.50;
@@ -35,7 +36,7 @@ const SplashScreenComponent = () => {
         await SplashScreen.hideAsync();
         setIsReady(true);
       } catch (e) {
-        console.warn('Error hiding native splash:', e);
+        logger.warn('Error hiding native splash:', e);
         setIsReady(true);
       }
     };

@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { color } from '../color/color';
-import SvgIcons from '../../components/SvgIcons';
-import Typography, { Body1, Caption } from '../components/Typography';
+import SvgIcons from '../components/SvgIcons';
+import Typography from '../components/Typography';
 
 const SuccessPopup = ({ visible, onClose, title = "", subtitle = "" }) => {
     return (

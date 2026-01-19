@@ -10,9 +10,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SvgIcons from '../../../components/SvgIcons';
 import { color } from '../../color/color';
+import SvgIcons from '../../components/SvgIcons';
 import Typography from '../../components/Typography';
+import logger from '../../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -327,7 +328,7 @@ const BlazingDealDetailScreen = ({ navigation, route }) => {
   };
 
   const handleSearchPress = () => {
-    console.log('Search pressed');
+    logger.debug('Search pressed');
   };
 
   const handleCategoryChange = (categoryId) => {
@@ -335,7 +336,7 @@ const BlazingDealDetailScreen = ({ navigation, route }) => {
   };
 
   const handleDealPress = (deal) => {
-    console.log('Deal pressed:', deal.title);
+    logger.debug('Deal pressed:', deal.title);
     // Navigate to deal details screen if needed
     // navigation.navigate('DealDetails', { deal });
   };

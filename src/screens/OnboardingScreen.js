@@ -12,8 +12,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from '../components/SvgIcons';
+import logger from '../utils/logger';
 
 const { width, height } = Dimensions.get('window');
 const IMAGE_HEIGHT = height * 0.50;
@@ -135,7 +136,7 @@ const OnboardingScreen = () => {
       // Navigate to Login screen
       navigation.replace('Login');
     } catch (error) {
-      console.error('Error saving onboarding status:', error);
+      logger.error('Error saving onboarding status:', error);
       // On error, still go to login
       navigation.replace('Login');
     }

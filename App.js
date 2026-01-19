@@ -2,7 +2,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppProvider } from './src/context/AppContext';
 import Navigation from './src/navigation/navigation';
+import logger from './src/utils/logger';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -18,7 +20,7 @@ function App() {
           setIsAppReady(true);
         }, 5000);
       } catch (error) {
-        console.warn('Error during splash delay', error);
+        logger.error('Error during splash delay', error);
         setIsAppReady(true);
       }
     };
@@ -43,11 +45,13 @@ function App() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={handleLayout}>
-      <NavigationContainer>
-        <Navigation />
-      </NavigationContainer>
-    </GestureHandlerRootView>
+    <AppProvider>
+      <GestureHandlerRootView style={{ flex: 1 }} onLayout={handleLayout}>
+        <NavigationContainer>
+          <Navigation />
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </AppProvider>
   );
 }
 

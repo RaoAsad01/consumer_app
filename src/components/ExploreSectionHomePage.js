@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native';
 import { color } from '../color/color';
+import logger from '../utils/logger';
 import Typography from './Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -53,7 +54,7 @@ const CategoryCard = React.memo(({
           style={styles.cardImage}
           resizeMode="cover"
           onError={(error) => {
-            console.warn('[CategoryCard] Image load error:', error.nativeEvent?.error);
+            logger.warn('[CategoryCard] Image load error:', error.nativeEvent?.error);
           }}
         />
       ) : (

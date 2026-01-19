@@ -12,14 +12,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
 import BuzzingCard from '../components/BuzzingCard';
 import DealCard from '../components/DealCard';
 import EventCard from '../components/EventCard';
 import ExclusiveSection from '../components/ExclusiveSection';
 import ExploreSectionHomePage from '../components/ExploreSectionHomePage';
+import SvgIcons from '../components/SvgIcons';
 import Typography from '../components/Typography';
+import logger from '../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -99,7 +100,7 @@ const SectionHeader = React.memo(({ title, onPress }) => (
       {title}
     </Typography>
     <TouchableOpacity style={styles.arrowButton} onPress={onPress}>
-      <Typography weight="400" size={14} color={color.black_212b34}>
+      <Typography weight="400" size={14} color={color.placeholderTxt_24282C}>
         {'>'}
       </Typography>
     </TouchableOpacity>
@@ -165,7 +166,7 @@ const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
       }
       return `item-${index}`;
     } catch (error) {
-      console.warn('[HorizontalCardList] keyExtractor error:', error);
+      logger.warn('[HorizontalCardList] keyExtractor error:', error);
       return `item-${index}`;
     }
   };
@@ -177,7 +178,7 @@ const HorizontalCardList = React.memo(({ data, renderItem, keyExtractor }) => {
       }
       return renderItem({ item, index });
     } catch (error) {
-      console.error('[HorizontalCardList] renderItem error:', error);
+      logger.error('[HorizontalCardList] renderItem error:', error);
       return null;
     }
   };
@@ -264,29 +265,29 @@ const ExploreScreen = () => {
   // MEMOIZED CALLBACKS
   // ============================================
   const handleCardPress = useCallback((item) => {
-    console.log('Card pressed:', item);
+    logger.debug('Card pressed:', item);
   }, []);
 
   const handleBookmarkPress = useCallback((item) => {
-    console.log('Bookmark pressed:', item);
+    logger.debug('Bookmark pressed:', item);
   }, []);
 
   const handleDestinationPress = useCallback((item) => {
-    console.log('Destination pressed:', item);
+    logger.debug('Destination pressed:', item);
   }, []);
 
   const handleDealPress = useCallback((deal) => {
-    console.log('Deal pressed:', deal);
+    logger.debug('Deal pressed:', deal);
   }, []);
 
   // Navigate to BlazingDealsScreen with specific tab when "View All Offers" is pressed
   const handleViewAllDealsPress = useCallback((category) => {
-    console.log('View all deals pressed:', category);
+    logger.debug('View all deals pressed:', category);
     navigation.navigate('BlazingDealDetail', { initialTab: category.id });
   }, [navigation]);
 
   const handleSectionPress = useCallback((sectionName) => {
-    console.log('Section pressed:', sectionName);
+    logger.debug('Section pressed:', sectionName);
     if (sectionName === 'Hot This Week') {
       navigation.navigate('HotThisWeek');
     }
@@ -299,11 +300,11 @@ const ExploreScreen = () => {
   }, [navigation]);
 
   const handleNearbyCardPress = useCallback((item) => {
-    console.log('Nearby event card pressed:', item);
+    logger.debug('Nearby event card pressed:', item);
   }, []);
 
   const handleNearbyBookmarkPress = useCallback((item) => {
-    console.log('Nearby bookmark pressed:', item);
+    logger.debug('Nearby bookmark pressed:', item);
   }, []);
 
   const handleNearbyHeaderPress = useCallback(() => {
@@ -311,35 +312,35 @@ const ExploreScreen = () => {
   }, [navigation]);
 
   const handleExclusiveCardPress = useCallback((item) => {
-    console.log('Exclusive card pressed:', item);
+    logger.debug('Exclusive card pressed:', item);
   }, []);
 
   const handleExclusiveBookmarkPress = useCallback((item) => {
-    console.log('Exclusive bookmark pressed:', item);
+    logger.debug('Exclusive bookmark pressed:', item);
   }, []);
 
   const handleExclusiveHeaderPress = useCallback(() => {
-    console.log('Exclusive header pressed');
+    logger.debug('Exclusive header pressed');
   }, []);
 
   const handleExploreJapanPress = useCallback((item) => {
-    console.log('Explore Japan category pressed:', item);
+    logger.debug('Explore Japan category pressed:', item);
   }, []);
 
   const handleNotificationPress = useCallback(() => {
-    console.log('Notification pressed');
+    logger.debug('Notification pressed');
   }, []);
 
   const handleLocationPress = useCallback(() => {
-    console.log('Location pressed');
+    logger.debug('Location pressed');
   }, []);
 
   const handleFilterPress = useCallback(() => {
-    console.log('Filter pressed');
+    logger.debug('Filter pressed');
   }, []);
 
   const handleInvitePress = useCallback(() => {
-    console.log('Invite pressed');
+    logger.debug('Invite pressed');
   }, []);
 
   // ============================================

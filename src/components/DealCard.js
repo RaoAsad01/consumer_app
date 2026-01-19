@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from './SvgIcons';
 import Typography from './Typography';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');

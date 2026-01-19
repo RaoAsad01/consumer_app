@@ -24,9 +24,11 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SvgIcons from '../../../components/SvgIcons';
 import { color } from '../../color/color';
+import SvgIcons from '../../components/SvgIcons';
 import Typography from '../../components/Typography';
+import env from '../../config/env';
+import logger from '../../utils/logger';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -269,6 +271,9 @@ const NearbyEventsScreen = ({ navigation }) => {
   const mapRef = useRef(null);
   const flatListRef = useRef(null);
 
+  // Check if Google Maps API key is configured
+  const isMapApiKeyConfigured = env.GOOGLE_MAPS_API_KEY && env.GOOGLE_MAPS_API_KEY !== 'YOUR_GOOGLE_MAPS_API_KEY';
+
   // Bottom sheet animation
   const translateY = useSharedValue(SCREEN_HEIGHT - SHEET_MIN_HEIGHT);
   const context = useSharedValue({ y: 0 });
@@ -286,7 +291,7 @@ const NearbyEventsScreen = ({ navigation }) => {
   }, []);
 
   const handleEventPress = useCallback((event) => {
-    console.log('Event pressed:', event.title);
+    logger.debug('Event pressed:', event.title);
   }, []);
 
   const handleBookmarkPress = useCallback((event) => {
@@ -302,11 +307,11 @@ const NearbyEventsScreen = ({ navigation }) => {
   };
 
   const handleFilterPress = useCallback(() => {
-    console.log('Filter pressed');
+    logger.debug('Filter pressed');
   }, []);
 
   const handleMarkerPress = useCallback((marker) => {
-    console.log('Marker pressed:', marker);
+    logger.debug('Marker pressed:', marker);
   }, []);
 
   // Pan gesture for bottom sheet - ONLY on handle area
@@ -438,15 +443,12 @@ const NearbyEventsScreen = ({ navigation }) => {
 
       {/* Map View */}
       <View style={styles.mapContainer}>
-        {mapError ? (
-          <View style={styles.mapErrorContainer}>
-            <Typography weight="600" size={14} color={color.grey_87807C} style={styles.mapErrorText}>
-              {mapError}
-            </Typography>
-            <Typography weight="400" size={12} color={color.grey_87807C} style={styles.mapErrorSubtext}>
-              Please configure Google Maps API key
-            </Typography>
-          </View>
+        {!isMapApiKeyConfigured || mapError ? (
+          <Image
+            source={require('../../../assets/images/map_image.png')}
+            style={styles.mapPlaceholder}
+            resizeMode="cover"
+          />
         ) : (
           <MapView
             ref={mapRef}
@@ -459,7 +461,7 @@ const NearbyEventsScreen = ({ navigation }) => {
               setMapError(null);
             }}
             onError={(error) => {
-              console.warn('MapView Error:', error);
+              logger.warn('MapView Error:', error);
               if (error.nativeEvent?.message) {
                 setMapError(error.nativeEvent.message);
               } else {
@@ -613,19 +615,10 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  mapErrorContainer: {
+  mapPlaceholder: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#F5F5F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  mapErrorText: {
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  mapErrorSubtext: {
-    textAlign: 'center',
+    width: '100%',
+    height: '100%',
   },
   myLocationButton: {
     position: 'absolute',

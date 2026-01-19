@@ -14,13 +14,14 @@ import {
   View
 } from 'react-native';
 import * as Yup from 'yup';
-import SvgIcons from '../../components/SvgIcons';
+import SvgIcons from '../components/SvgIcons';
 import { authService } from '../api/apiService';
 import { color } from '../color/color';
 import CountryCodePicker from '../components/CountryCodePicker';
 import Typography, { Caption } from '../components/Typography';
 import { defaultCountryCode } from '../constants/countryCodes';
 import { getAutoDetectedCountry } from '../utils/countryDetection';
+import logger from '../utils/logger';
 
 const LoginScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -67,7 +68,7 @@ const LoginScreen = ({ route }) => {
             setSelectedCountry(detectedCountry);
           }
         } catch (error) {
-          console.error('Failed to auto-detect country:', error);
+          logger.error('Failed to auto-detect country:', error);
         } finally {
           setIsDetectingCountry(false);
         }

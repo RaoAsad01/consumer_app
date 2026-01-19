@@ -1,5 +1,6 @@
 import * as Location from 'expo-location';
 import { countryCodes } from '../constants/countryCodes';
+import logger from './logger';
 
 /**
  * Detects the country code based on the user's current location
@@ -7,24 +8,24 @@ import { countryCodes } from '../constants/countryCodes';
  */
 export const detectCountryCode = async () => {
   try {
-    console.log('Checking location permissions...');
+    logger.debug('Checking location permissions...');
     // First check if permission is already granted
     let { status } = await Location.getForegroundPermissionsAsync();
     
     // If not granted, request it
     if (status !== 'granted') {
-      console.log('Requesting location permissions...');
+      logger.debug('Requesting location permissions...');
       const permissionResult = await Location.requestForegroundPermissionsAsync();
       status = permissionResult.status;
     }
     
     if (status !== 'granted') {
-      console.log('Location permission not granted, status:', status);
+      logger.debug('Location permission not granted, status:', status);
       return null;
     }
-    console.log('Location permission granted');
+    logger.debug('Location permission granted');
 
-    console.log('Getting current position...');
+    logger.debug('Getting current position...');
     // Get current position with better error handling
     let location;
     try {
@@ -34,7 +35,7 @@ export const detectCountryCode = async () => {
         maximumAge: 300000, // 5 minutes
       });
     } catch (locationError) {
-      console.error('Error getting location:', locationError);
+      logger.error('Error getting location:', locationError);
       // Try with lower accuracy if high accuracy fails
       try {
         location = await Location.getCurrentPositionAsync({
@@ -43,22 +44,22 @@ export const detectCountryCode = async () => {
           maximumAge: 600000, // 10 minutes for low accuracy
         });
       } catch (lowAccuracyError) {
-        console.error('Error getting location with low accuracy:', lowAccuracyError);
+        logger.error('Error getting location with low accuracy:', lowAccuracyError);
         return null;
       }
     }
 
     if (!location || !location.coords) {
-      console.log('No location data obtained');
+      logger.debug('No location data obtained');
       return null;
     }
 
-    console.log('Location obtained:', {
+    logger.debug('Location obtained:', {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude
     });
 
-    console.log('Reverse geocoding...');
+    logger.debug('Reverse geocoding...');
     // Reverse geocode to get address
     let address;
     try {
@@ -67,22 +68,22 @@ export const detectCountryCode = async () => {
         longitude: location.coords.longitude,
       });
     } catch (geocodeError) {
-      console.error('Error reverse geocoding:', geocodeError);
+      logger.error('Error reverse geocoding:', geocodeError);
       return null;
     }
 
-    console.log('Address data:', address);
+    logger.debug('Address data:', address);
 
     if (address && address.length > 0 && address[0].isoCountryCode) {
       const countryCode = address[0].isoCountryCode;
-      console.log('Detected country code from location:', countryCode);
+      logger.debug('Detected country code from location:', countryCode);
       return countryCode;
     }
 
-    console.log('No address data found');
+    logger.debug('No address data found');
     return null;
   } catch (error) {
-    console.error('Error detecting country code:', error);
+    logger.error('Error detecting country code:', error);
     return null;
   }
 };
@@ -93,42 +94,42 @@ export const detectCountryCode = async () => {
  */
 export const detectCountryFromLocale = () => {
   try {
-    console.log('Attempting locale-based country detection...');
+    logger.debug('Attempting locale-based country detection...');
     
     // Try multiple methods to get locale
     let locale;
     try {
       // Method 1: Intl.DateTimeFormat
       locale = Intl.DateTimeFormat().resolvedOptions().locale;
-      console.log('Device locale (Intl):', locale);
+      logger.debug('Device locale (Intl):', locale);
     } catch (e) {
-      console.log('Intl.DateTimeFormat failed, trying navigator...');
+      logger.debug('Intl.DateTimeFormat failed, trying navigator...');
       // Method 2: Navigator language
       if (typeof navigator !== 'undefined' && navigator.language) {
         locale = navigator.language;
-        console.log('Device locale (navigator):', locale);
+        logger.debug('Device locale (navigator):', locale);
       }
     }
     
     if (!locale) {
-      console.log('No locale found');
+      logger.debug('No locale found');
       return null;
     }
     
     // Extract country code from locale (format: en-US, en_US, etc.)
     const countryCode = locale.split('-')[1] || locale.split('_')[1];
-    console.log('Extracted country code from locale:', countryCode);
+    logger.debug('Extracted country code from locale:', countryCode);
     
     if (countryCode && countryCode.length === 2) {
       const upperCode = countryCode.toUpperCase();
-      console.log('✅ Detected country code from locale:', upperCode);
+      logger.debug('✅ Detected country code from locale:', upperCode);
       return upperCode;
     }
     
-    console.log('No valid country code found in locale');
+    logger.debug('No valid country code found in locale');
     return null;
   } catch (error) {
-    console.error('Error detecting country from locale:', error);
+    logger.error('Error detecting country from locale:', error);
     return null;
   }
 };
@@ -139,9 +140,9 @@ export const detectCountryFromLocale = () => {
  */
 export const detectCountryFromTimezone = () => {
   try {
-    console.log('Attempting timezone-based country detection...');
+    logger.debug('Attempting timezone-based country detection...');
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log('Device timezone:', timezone);
+    logger.debug('Device timezone:', timezone);
     
     // Map common timezones to country codes
     const timezoneToCountry = {
@@ -168,14 +169,14 @@ export const detectCountryFromTimezone = () => {
     
     const countryCode = timezoneToCountry[timezone];
     if (countryCode) {
-      console.log('Detected country code from timezone:', countryCode);
+      logger.debug('Detected country code from timezone:', countryCode);
       return countryCode;
     }
     
-    console.log('No country code found for timezone:', timezone);
+    logger.debug('No country code found for timezone:', timezone);
     return null;
   } catch (error) {
-    console.error('Error detecting country from timezone:', error);
+    logger.error('Error detecting country from timezone:', error);
     return null;
   }
 };
@@ -198,61 +199,61 @@ export const findCountryByIsoCode = (isoCode) => {
  */
 export const getAutoDetectedCountry = async () => {
   try {
-    console.log('Starting country auto-detection...');
+    logger.debug('Starting country auto-detection...');
     
     // Method 1: Try location-based detection (most accurate)
-    console.log('Method 1: Attempting location-based detection...');
+    logger.debug('Method 1: Attempting location-based detection...');
     const detectedIsoCode = await detectCountryCode();
-    console.log('Location detection result:', detectedIsoCode);
+    logger.debug('Location detection result:', detectedIsoCode);
     
     if (detectedIsoCode) {
       const country = findCountryByIsoCode(detectedIsoCode);
       if (country) {
-        console.log('Country detected from location:', country.name, country.code);
+        logger.debug('Country detected from location:', country.name, country.code);
         return country;
       } else {
-        console.log('Country not found in our list for code:', detectedIsoCode);
+        logger.debug('Country not found in our list for code:', detectedIsoCode);
       }
     } else {
-      console.log('Location detection failed or permission denied');
+      logger.debug('Location detection failed or permission denied');
     }
     
     // Method 2: Try timezone-based detection (more reliable than locale)
-    console.log('Method 2: Attempting timezone-based detection...');
+    logger.debug('Method 2: Attempting timezone-based detection...');
     const timezoneIsoCode = detectCountryFromTimezone();
-    console.log('Timezone detection result:', timezoneIsoCode);
+    logger.debug('Timezone detection result:', timezoneIsoCode);
     
     if (timezoneIsoCode) {
       const country = findCountryByIsoCode(timezoneIsoCode);
       if (country) {
-        console.log('Country detected from timezone:', country.name, country.code);
+        logger.debug('Country detected from timezone:', country.name, country.code);
         return country;
       } else {
-        console.log('Country not found in our list for code:', timezoneIsoCode);
+        logger.debug('Country not found in our list for code:', timezoneIsoCode);
       }
     } else {
-      console.log('Timezone detection failed');
+      logger.debug('Timezone detection failed');
     }
     
     // Method 3: Fallback to locale-based detection
-    console.log('Method 3: Attempting locale-based detection...');
+    logger.debug('Method 3: Attempting locale-based detection...');
     const localeIsoCode = detectCountryFromLocale();
-    console.log('Locale detection result:', localeIsoCode);
+    logger.debug('Locale detection result:', localeIsoCode);
     
     if (localeIsoCode) {
       const country = findCountryByIsoCode(localeIsoCode);
       if (country) {
-        console.log('Country detected from locale:', country.name, country.code);
+        logger.debug('Country detected from locale:', country.name, country.code);
         return country;
       } else {
-        console.log('Country not found in our list for code:', localeIsoCode);
+        logger.debug('Country not found in our list for code:', localeIsoCode);
       }
     } else {
-      console.log('Locale detection failed');
+      logger.debug('Locale detection failed');
     }
     
     // Final fallback to default country (Pakistan)
-    console.log('All detection methods failed, using default country: Pakistan');
+    logger.debug('All detection methods failed, using default country: Pakistan');
     const defaultCountry = findCountryByIsoCode('PK') || {
       name: 'Pakistan',
       code: 'PK',
@@ -262,7 +263,7 @@ export const getAutoDetectedCountry = async () => {
     return defaultCountry;
     
   } catch (error) {
-    console.error('Error in getAutoDetectedCountry:', error);
+    logger.error('Error in getAutoDetectedCountry:', error);
     // Return default country on error
     return findCountryByIsoCode('PK') || {
       name: 'Pakistan',

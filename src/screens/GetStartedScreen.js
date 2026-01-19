@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -18,14 +19,15 @@ import {
   View
 } from 'react-native';
 import * as Yup from 'yup';
-import SvgIcons from '../../components/SvgIcons';
 import { userService } from '../api/apiService';
 import { color } from '../color/color';
 import CountryCodePicker from '../components/CountryCodePicker';
+import SvgIcons from '../components/SvgIcons';
 import Typography, { Caption } from '../components/Typography';
 import { defaultCountryCode } from '../constants/countryCodes';
 import OtpErrorPopup from '../constants/OtpErrorPopup';
 import { getAutoDetectedCountry } from '../utils/countryDetection';
+import logger from '../utils/logger';
 
 // Helper function to detect if user identifier is email or phone
 function isEmail(identifier) {
@@ -74,9 +76,9 @@ const GetStartedScreen = ({ route }) => {
 
   // Debug logging
   useEffect(() => {
-    console.log('GetStartedScreen - userIdentifier:', userIdentifier);
-    console.log('GetStartedScreen - userLoggedInWithEmail:', userLoggedInWithEmail);
-    console.log('GetStartedScreen - isEmailLogin (show email field?):', isEmailLogin);
+    logger.debug('GetStartedScreen - userIdentifier:', userIdentifier);
+    logger.debug('GetStartedScreen - userLoggedInWithEmail:', userLoggedInWithEmail);
+    logger.debug('GetStartedScreen - isEmailLogin (show email field?):', isEmailLogin);
   }, [userIdentifier, userLoggedInWithEmail, isEmailLogin]);
 
   const { height: screenHeight } = Dimensions.get('window');
@@ -109,7 +111,7 @@ const GetStartedScreen = ({ route }) => {
               setSelectedCountry(detectedCountry);
             }
           } catch (error) {
-            console.error('Failed to auto-detect country:', error);
+            logger.error('Failed to auto-detect country:', error);
           } finally {
             setIsDetectingCountry(false);
           }
@@ -363,7 +365,7 @@ const GetStartedScreen = ({ route }) => {
       // Check if token exists before making API call
       const token = await SecureStore.getItemAsync('accessToken');
       if (!token) {
-        console.error('No access token found. User needs to login again.');
+        logger.error('No access token found. User needs to login again.');
         setErrorPopupMessage('Please login again to continue.');
         setShowErrorPopup(true);
         // Navigate to login after a delay
@@ -377,7 +379,7 @@ const GetStartedScreen = ({ route }) => {
         return;
       }
 
-      console.log('Token found, proceeding with profile update');
+      logger.debug('Token found, proceeding with profile update');
 
       // Backend expects a single 'name' field (not first_name and last_name)
       // Backend behavior: If the name contains a space, the last part is treated as the last name
@@ -418,16 +420,16 @@ const GetStartedScreen = ({ route }) => {
         }
       }
 
-      console.log('Submitting profile data:', profileData);
+      logger.debug('Submitting profile data:', profileData);
 
       // Call the API
       const response = await userService.updateProfileJson(profileData);
 
-      console.log('Profile update response:', response);
+      logger.debug('Profile update response:', response);
 
       // Check if the response is successful
       if (response && (response.success === true || response.status === 200)) {
-        console.log('Profile update successful, navigating to home screen');
+        logger.info('Profile update successful, navigating to home screen');
 
         // Navigate to home screen on success
         navigation.reset({
@@ -439,7 +441,7 @@ const GetStartedScreen = ({ route }) => {
         throw new Error(response?.message || 'Profile update failed');
       }
     } catch (error) {
-      console.error('Profile update error:', error);
+      logger.error('Profile update error:', error);
 
       // Handle authentication errors specifically
       if (error.response?.status === 401 || error.status === 401) {
@@ -522,8 +524,14 @@ const GetStartedScreen = ({ route }) => {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        enabled={Platform.OS === 'ios'}
+        keyboardVerticalOffset={0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
           <ScrollView
             style={styles.container}
             contentContainerStyle={styles.contentContainer}
@@ -1162,6 +1170,7 @@ const GetStartedScreen = ({ route }) => {
           />
         </View>
       </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 };
@@ -1172,7 +1181,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 20,// Extra padding for Continue button
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'android' ? 100 : 80, // Extra padding for Continue button
   },
   headerSection: {
     marginTop: 40,

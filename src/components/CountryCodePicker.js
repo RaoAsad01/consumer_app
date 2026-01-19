@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
+import SvgIcons from './SvgIcons';
 import { color } from '../color/color';
 import { countryCodes } from '../constants/countryCodes';
 import Typography from './Typography';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from '../components/SvgIcons';
 import Typography from '../components/Typography';
 
 const OtpErrorPopup = ({ 

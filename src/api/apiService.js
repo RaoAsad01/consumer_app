@@ -1,18 +1,18 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import ENV from '../config/env';
+import logger from '../utils/logger';
 
-// Base URL configuration
-const BASE_URL = 'https://d1-api.hexallo.com/';
-//for dev orgainer const BASE_URL = 'https://d1-api.hexallo.com/';
-//for dev admin  const BASE_URL = 'https://d1-admin.hexallo.com/';
-//for prod orgainer const BASE_URL = 'https://t1-api.hexallo.com/';
-//for prod admin  const BASE_URL = 'https://t1-admin.hexallo.com/';
+// Base URL configuration from environment
+const BASE_URL = ENV.API_BASE_URL;
+
 // Create axios instance with default config
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 seconds timeout
 });
 
 // Request interceptor for adding auth token
@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
           config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error('Error getting token from SecureStore:', error);
+        logger.error('Error getting token from SecureStore:', error);
       }
     }
 
@@ -50,9 +50,9 @@ apiClient.interceptors.response.use(
       try {
         // Clear the invalid token
         await SecureStore.deleteItemAsync('accessToken');
-        console.log('Token expired or invalid, cleared from storage');
+        logger.info('Token expired or invalid, cleared from storage');
       } catch (clearError) {
-        console.error('Error clearing token:', clearError);
+        logger.error('Error clearing token:', clearError);
       }
     }
 
@@ -76,8 +76,9 @@ export const authService = {
   // Request OTP service
   requestOtp: async (data) => {
     try {
+      logger.api.request('POST', endpoints.otpRequest, { uuid: data?.uuid });
       const response = await apiClient.post(endpoints.otpRequest, data);
-      console.log('Consumer API Response:', response.data);
+      logger.api.response('POST', endpoints.otpRequest, response.status, response.data);
 
       if (!response.data) {
         throw new Error('No data received from server');
@@ -85,12 +86,7 @@ export const authService = {
 
       return response.data;
     } catch (error) {
-      console.error('OTP Request Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        request: error.config?.data
-      });
+      logger.api.error('POST', endpoints.otpRequest, error);
 
       // If we have a response from the server
       if (error.response?.data) {
@@ -110,36 +106,24 @@ export const authService = {
   // Verify OTP service
   verifyOtp: async (data) => {
     try {
-      console.log('Verifying OTP with payload:', { uuid: data.uuid, otp: '*' });
+      logger.api.request('POST', endpoints.verifyOtp, { uuid: data.uuid, otp: '***' });
       const response = await apiClient.post(endpoints.verifyOtp, data);
-      console.log(' OTP Verification Response Status:', response.status);
+      logger.api.response('POST', endpoints.verifyOtp, response.status);
+      
       const responseData = response.data;
       const accessToken = responseData?.data?.access_token || responseData?.access_token;
 
       if (accessToken) {
         await SecureStore.setItemAsync('accessToken', accessToken);
-        console.log('Token stored successfully in SecureStore');
-
-        // Verify token was stored
-        const storedToken = await SecureStore.getItemAsync('accessToken');
-        console.log('Token verification - stored:', !!storedToken);
+        logger.info('Token stored successfully in SecureStore');
       } else {
-        console.warn('No access_token found in response');
-        console.warn('Response structure:', JSON.stringify(responseData, null, 2));
+        logger.warn('No access_token found in response');
       }
 
       // Return the full response data structure
       return responseData;
     } catch (error) {
-      console.error('OTP Verification Error:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-        request: error.config?.data,
-        url: error.config?.url,
-        baseURL: BASE_URL
-      });
+      logger.api.error('POST', endpoints.verifyOtp, error);
 
       if (error.response?.data) {
         const errorMessage = error.response.data.message ||
@@ -159,8 +143,31 @@ export const authService = {
   },
 };
 
-//GetStarted Screen
+// User Service
 export const userService = {
+  // Get user profile
+  getProfile: async () => {
+    try {
+      logger.api.request('GET', endpoints.userProfile);
+      const response = await apiClient.get(endpoints.userProfile);
+      logger.api.response('GET', endpoints.userProfile, response.status);
+      return response.data;
+    } catch (error) {
+      logger.api.error('GET', endpoints.userProfile, error);
+      if (error.response?.data) {
+        throw {
+          message: error.response.data.message || 'Failed to fetch profile.',
+          response: error.response
+        };
+      }
+      throw {
+        message: 'Network error. Please check your connection.',
+        error: error
+      };
+    }
+  },
+
+  // Update user profile
   updateProfileJson: async (profileData) => {
     try {
       // Create FormData object for multipart/form-data
@@ -182,21 +189,16 @@ export const userService = {
         formData.append('gender', String(profileData.gender));
       }
 
-      console.log("Profile update FormData:", formData);
-
+      logger.api.request('PATCH', endpoints.updateProfile, 'FormData');
       const response = await apiClient.patch(endpoints.updateProfile, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log("Profile update response:", response.data);
+      logger.api.response('PATCH', endpoints.updateProfile, response.status);
       return response.data;
     } catch (error) {
-      console.error('Update Profile Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
+      logger.api.error('PATCH', endpoints.updateProfile, error);
       if (error.response?.data) {
         throw {
           message: error.response.data.message || 'Failed to update profile.',

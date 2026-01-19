@@ -1,8 +1,9 @@
 import React from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from './SvgIcons';
 import Typography from './Typography';
+import logger from '../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Base dimensions from design: container 238x240, image 218x130
@@ -75,7 +76,7 @@ const EventCard = ({
                 style={styles.cardImage}
                 resizeMode="cover"
                 onError={(error) => {
-                  console.warn('[EventCard] Image load error:', error.nativeEvent?.error);
+                  logger.warn('[EventCard] Image load error:', error.nativeEvent?.error);
                 }}
               />
             ) : (
@@ -150,7 +151,7 @@ const EventCard = ({
       </TouchableOpacity>
     );
   } catch (error) {
-    console.error('[EventCard] Render error:', error);
+    logger.error('[EventCard] Render error:', error);
     return null;
   }
 };

@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     Dimensions,
@@ -10,49 +11,48 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { color } from '../../color/color';
 import SvgIcons from '../../components/SvgIcons';
-import { color } from '../color/color';
-import Typography from '../components/Typography';
+import Typography from '../../components/Typography';
+import logger from '../../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ============ Data ============
 const CATEGORIES = [
-    { id: 'events', label: 'Events' },
-    { id: 'nightlife', label: 'Nightlife' },
-    { id: 'restaurants', label: 'Restaurants' },
-    { id: 'sports', label: 'Sports' },
-    { id: 'places', label: 'Places' },
-    { id: 'games', label: 'Games' },
-    { id: 'movies', label: 'Movies' },
-    { id: 'tours', label: 'Tours' },
+    { id: 'all', label: 'All' },
+    { id: 'concerts', label: 'Concerts' },
+    { id: 'parties', label: 'Parties' },
+    { id: 'pageantry', label: 'Pageantry' },
+    { id: 'festivals', label: 'Festivals' },
+    { id: 'arts', label: 'Arts' },
 ];
 
-const EVENTS_DATA = [
+const ALL_EVENTS_DATA = [
     {
         id: '1',
-        title: 'Q/A Session',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
+        title: 'Networking',
+        image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400',
+        date: 'Sun, 15 Oct 2023',
+        time: '8:00am - 4:00pm',
+        location: 'Sunny Meadows, Boulder, CO',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '2',
-        title: 'Girls Meetup',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
+        title: 'Q/A Session',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
+        date: 'Thu, 20 Jul 2023',
+        time: '6:00pm - 10:00pm',
+        location: 'City Gallery, San Francisco, CA',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '3',
-        title: 'Tech Conference 2023',
-        image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400',
+        title: 'Coffee Chat',
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
         date: 'Sat, 12 Aug 2023',
         time: '9:00am - 5:00pm',
         location: 'Hilton Hotel, New York, NY',
@@ -61,48 +61,28 @@ const EVENTS_DATA = [
     },
     {
         id: '4',
-        title: 'Music Festival',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-        date: 'Sun, 20 Aug 2023',
-        time: '4:00pm - 11:00pm',
-        location: 'Central Park, New York, NY',
-        price: 50,
-        isBookmarked: true,
+        title: 'Networking',
+        image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=400',
+        date: 'Sun, 15 Oct 2023',
+        time: '8:00am - 4:00pm',
+        location: 'Sunny Meadows, Boulder, CO',
+        price: 25,
+        isBookmarked: false,
     },
     {
         id: '5',
-        title: 'Art Exhibition',
-        image: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=400',
-        date: 'Mon, 25 Aug 2023',
-        time: '10:00am - 6:00pm',
-        location: 'Modern Art Museum, LA',
-        price: 15,
+        title: 'Q/A Session',
+        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
+        date: 'Thu, 20 Jul 2023',
+        time: '6:00pm - 10:00pm',
+        location: 'City Gallery, San Francisco, CA',
+        price: 25,
         isBookmarked: false,
     },
     {
         id: '6',
-        title: 'Q/A Session',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
-        price: 25,
-        isBookmarked: false,
-    },
-    {
-        id: '7',
-        title: 'Girls Meetup',
+        title: 'Coffee Chat',
         image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
-        price: 25,
-        isBookmarked: false,
-    },
-    {
-        id: '8',
-        title: 'Tech Conference 2023',
-        image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400',
         date: 'Sat, 12 Aug 2023',
         time: '9:00am - 5:00pm',
         location: 'Hilton Hotel, New York, NY',
@@ -110,23 +90,23 @@ const EVENTS_DATA = [
         isBookmarked: false,
     },
     {
-        id: '9',
-        title: 'Music Festival',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-        date: 'Sun, 20 Aug 2023',
-        time: '4:00pm - 11:00pm',
-        location: 'Central Park, New York, NY',
-        price: 50,
-        isBookmarked: true,
+        id: '7',
+        title: 'Tech Meetup',
+        image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400',
+        date: 'Wed, 18 Oct 2023',
+        time: '6:00pm - 9:00pm',
+        location: 'Innovation Hub, Austin, TX',
+        price: 15,
+        isBookmarked: false,
     },
     {
-        id: '10',
-        title: 'Art Exhibition',
+        id: '8',
+        title: 'Art Workshop',
         image: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=400',
-        date: 'Mon, 25 Aug 2023',
-        time: '10:00am - 6:00pm',
-        location: 'Modern Art Museum, LA',
-        price: 15,
+        date: 'Fri, 20 Oct 2023',
+        time: '10:00am - 2:00pm',
+        location: 'Creative Studio, Portland, OR',
+        price: 35,
         isBookmarked: false,
     },
 ];
@@ -146,7 +126,7 @@ const Header = ({ onBackPress, onSearchPress }) => {
             </TouchableOpacity>
 
             <Typography weight="700" size={18} color={color.brown_3C200A}>
-                Hot This Week
+                Explore All Events
             </Typography>
 
             <TouchableOpacity
@@ -284,25 +264,26 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
 };
 
 // ============ Main Screen ============
-const HotThisWeekScreen = ({ navigation }) => {
-    const [activeCategory, setActiveCategory] = useState('events');
-    const [events, setEvents] = useState(EVENTS_DATA);
+const ExploreAllEventsScreen = () => {
+    const navigation = useNavigation();
+    const [activeCategory, setActiveCategory] = useState('all');
+    const [events, setEvents] = useState(ALL_EVENTS_DATA);
 
     const handleBackPress = () => {
         navigation?.goBack();
     };
 
     const handleSearchPress = () => {
-        console.log('Search pressed');
+        logger.debug('Search pressed');
     };
 
     const handleCategoryChange = (categoryId) => {
         setActiveCategory(categoryId);
-        console.log('Category changed:', categoryId);
+        logger.debug('Category changed:', categoryId);
     };
 
     const handleEventPress = (event) => {
-        console.log('Event pressed:', event.title);
+        logger.debug('Event pressed:', event.title);
     };
 
     const handleBookmarkPress = (event) => {
@@ -333,9 +314,6 @@ const HotThisWeekScreen = ({ navigation }) => {
                 activeCategory={activeCategory}
                 onCategoryChange={handleCategoryChange}
             />
-
-            {/* Divider */}
-            <View style={styles.divider} />
 
             {/* Events List */}
             <FlatList
@@ -376,6 +354,8 @@ const styles = StyleSheet.create({
     // Category Tabs
     categoryTabsWrapper: {
         backgroundColor: color.white_FFFFFF,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
     },
     categoryTabsContainer: {
         paddingHorizontal: 24,
@@ -395,17 +375,11 @@ const styles = StyleSheet.create({
         borderRadius: 1,
     },
 
-    // Divider
-    divider: {
-        height: 1,
-        backgroundColor: '#F0F0F0',
-    },
-
     // Events List
     eventsList: {
         paddingHorizontal: 24,
         paddingTop: 16,
-        paddingBottom: 120,
+        paddingBottom: 24,
     },
     eventSeparator: {
         height: 24,
@@ -457,4 +431,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HotThisWeekScreen;
+export default ExploreAllEventsScreen;

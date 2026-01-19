@@ -7,12 +7,22 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "API_BASE_URL": "https://d1-api.hexallo.com/",
+        "ENV": "development",
+        "ENABLE_LOGGING": "true"
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "API_BASE_URL": "https://d1-api.hexallo.com/",
+        "ENV": "preview",
+        "ENABLE_LOGGING": "true"
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
@@ -20,6 +30,11 @@
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "API_BASE_URL": "https://t1-api.hexallo.com/",
+        "ENV": "production",
+        "ENABLE_LOGGING": "false"
+      },
       "android": {
         "buildType": "app-bundle"
       }

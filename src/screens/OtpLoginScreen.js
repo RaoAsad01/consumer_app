@@ -13,12 +13,13 @@ import {
   TouchableWithoutFeedback,
   View
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
+import SvgIcons from '../components/SvgIcons';
 import { authService } from '../api/apiService';
 import { color } from '../color/color';
 import Typography from '../components/Typography';
 import OtpErrorPopup from '../constants/OtpErrorPopup';
 import OtpSuccessPopup from '../constants/OtpSuccessPopup';
+import logger from '../utils/logger';
 
 // Helper function to format seconds as mm:ss
 function formatTime(seconds) {
@@ -65,7 +66,7 @@ const OtpLoginScreen = ({ route }) => {
 
   useEffect(() => {
     if (!uuid || !userIdentifier) {
-      console.log('Missing required parameters:', { uuid, userIdentifier });
+      logger.warn('Missing required parameters:', { uuid, userIdentifier });
       Alert.alert('Error', 'Missing verification information');
       navigation.goBack();
     }
@@ -92,7 +93,7 @@ const OtpLoginScreen = ({ route }) => {
 
   const handleSignIn = async (otpArray) => {
     const enteredOtp = otpArray.join('');
-    console.log('handleSignIn called with OTP:', enteredOtp);
+    logger.debug('handleSignIn called with OTP:', enteredOtp);
     if (enteredOtp.length === 5) {
       setLoading(true);
       try {
@@ -102,7 +103,7 @@ const OtpLoginScreen = ({ route }) => {
           role: 'CUSTOMER'
         };
         const response = await authService.verifyOtp(payload);
-        console.log('OTP verify response:', response);
+        logger.debug('OTP verify response:', response);
         if (response && response.success === true) {
           setShowError(false);
           setErrorMessage('');
@@ -119,7 +120,7 @@ const OtpLoginScreen = ({ route }) => {
           setLoading(false);
         }
       } catch (error) {
-        console.log('OTP Verification Error:', error);
+        logger.error('OTP Verification Error:', error);
         // Extract error message from error object
         const errorMessage = error?.message ||
           error?.response?.data?.message ||
@@ -178,7 +179,7 @@ const OtpLoginScreen = ({ route }) => {
         setShowErrorPopup(true);
       }
     } catch (error) {
-      console.error('Resend OTP Error:', error);
+      logger.error('Resend OTP Error:', error);
       setShowErrorPopup(true);
     }
   };
@@ -206,7 +207,7 @@ const OtpLoginScreen = ({ route }) => {
     setOtp(updatedOtp);
     setShowError(false);
     setErrorMessage('');
-    console.log('OTP changed:', updatedOtp);
+    logger.debug('OTP changed:', updatedOtp);
     // Move to next input field automatically
     if (value && index < otp.length - 1) {
       inputRefs.current[index + 1]?.focus();

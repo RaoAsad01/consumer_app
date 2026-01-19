@@ -1,14 +1,14 @@
 import React from 'react';
 import {
     Dimensions,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View
 } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from '../components/SvgIcons';
 import Typography from '../components/Typography';
+import logger from '../utils/logger';
 
 const { width } = Dimensions.get('window');
 const NUM_COLUMNS = 4;
@@ -43,7 +43,7 @@ const categories = [
 
 const ExploreCategories = () => {
   const handleCategoryPress = (category) => {
-    console.log('Category pressed:', category.name);
+    logger.debug('Category pressed:', category.name);
     // TODO: Navigate to category screen
   };
 

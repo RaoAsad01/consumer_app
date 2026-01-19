@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from './SvgIcons';
 import Typography from './Typography';
+import logger from '../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CONTAINER_PADDING = 20 * 2; // Left + right padding
@@ -53,7 +54,7 @@ const ExclusiveCard = React.memo(({
                             style={styles.cardImage}
                             resizeMode="cover"
                             onError={(error) => {
-                                console.warn('[ExclusiveCard] Image load error:', error.nativeEvent?.error);
+                                logger.warn('[ExclusiveCard] Image load error:', error.nativeEvent?.error);
                             }}
                         />
                     ) : (
@@ -191,7 +192,7 @@ const ExclusiveSection = ({
                             </View>
                         );
                     } catch (error) {
-                        console.error('[ExclusiveSection] Card render error:', error);
+                        logger.error('[ExclusiveSection] Card render error:', error);
                         return null;
                     }
                 })}

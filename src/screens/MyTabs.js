@@ -22,9 +22,10 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import SvgIcons from '../../components/SvgIcons';
 import { color } from '../color/color';
+import SvgIcons from '../components/SvgIcons';
 import Typography from '../components/Typography';
+import logger from '../utils/logger';
 import HomeScreen from './CheckIn';
 import ConsumerHomeScreen from './HomeScreen';
 import ManualScan from './ManualScan';
@@ -32,7 +33,7 @@ import ProfileScreen from './ProfileScreen';
 import Tickets from './Tickets';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const HEADER_HEIGHT = 50;
+const HEADER_HEIGHT = 30;
 const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 85 : 70;
 const CATEGORIES_CONTENT_HEIGHT = SCREEN_HEIGHT * 0.65;
 const TOTAL_PANEL_HEIGHT = HEADER_HEIGHT + CATEGORIES_CONTENT_HEIGHT;
@@ -116,27 +117,27 @@ const ExploreCategories = ({ onCategoryPress }) => {
 
 // Tab mapping
 const tabMapping = {
-  Dashboard: {
+  Explore: {
     label: 'Explore',
     icon: SvgIcons.exploreBottomTabIcon,
     inactiveIcon: SvgIcons.exploreInactiveBottomIcon,
   },
-  Tickets: {
+  Services: {
     label: 'Services',
     icon: SvgIcons.servicesActiveBottomIcon,
     inactiveIcon: SvgIcons.servicesInactiveBottomIcon,
   },
-  'Check In': {
+  Mobility: {
     label: 'Mobility',
     icon: SvgIcons.mobilityActiveBottomIcon,
     inactiveIcon: SvgIcons.mobilityInactiveBottomIcon,
   },
-  Manual: {
+  Marketplace: {
     label: 'Marketplace',
     icon: SvgIcons.marketplaceActiveBottomIcon,
     inactiveIcon: SvgIcons.marketplaceInactiveBottomIcon,
   },
-  Profile: {
+  More: {
     label: 'More',
     icon: SvgIcons.moreActiveBottomIcon,
     inactiveIcon: SvgIcons.moreInactiveBottomIcon,
@@ -250,7 +251,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   });
 
   const handleCategoryPress = useCallback((category) => {
-    console.log('Category pressed:', category);
+    logger.debug('Category pressed:', category);
     translateY.value = withSpring(CATEGORIES_CONTENT_HEIGHT, SPRING_CONFIG, (finished) => {
       if (finished) {
         runOnJS(updateExpandedState)(false);
@@ -288,7 +289,6 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
           {/* Header with combined gesture (swipe + tap) */}
           <GestureDetector gesture={combinedGesture}>
             <Animated.View style={styles.header}>
-              <View style={styles.handleBar} />
               <Typography
                 weight="600"
                 size={16}
@@ -387,38 +387,38 @@ function MyTabs() {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="Dashboard"
+      initialRouteName="Explore"
     >
       <Tab.Screen
-        name="Dashboard"
+        name="Explore"
         options={{ headerShown: false, unmountOnBlur: true }}
       >
         {() => <ConsumerHomeScreen />}
       </Tab.Screen>
 
       <Tab.Screen
-        name="Tickets"
+        name="Services"
         options={{ headerShown: false, unmountOnBlur: true }}
       >
         {() => <Tickets />}
       </Tab.Screen>
 
       <Tab.Screen
-        name="Check In"
+        name="Mobility"
         options={{ headerShown: false, unmountOnBlur: true }}
       >
         {() => <HomeScreen />}
       </Tab.Screen>
 
       <Tab.Screen
-        name="Manual"
+        name="Marketplace"
         options={{ headerShown: false, unmountOnBlur: true }}
       >
         {() => <ManualScan />}
       </Tab.Screen>
 
       <Tab.Screen
-        name="Profile"
+        name="More"
         component={ProfileScreen}
         options={{ headerShown: false, unmountOnBlur: true }}
       />
@@ -470,8 +470,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: color.btnBrown_AE6F28,
-    paddingTop: 10,
-    paddingBottom: 14,
+   
     alignItems: 'center',
     justifyContent: 'center',
     height: HEADER_HEIGHT,

@@ -4,17 +4,20 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { Platform, useColorScheme } from 'react-native';
+import BlazingDealDetailScreen from '../screens/blazingdealdetail/BlazingDealDetailScreen';
 import GetStartedScreen from '../screens/GetStartedScreen';
-import HotThisWeekScreen from '../screens/HotThisWeekScreen';
+import ExploreAllEventsScreen from '../screens/hotthisweekevents/ExploreAllEvents';
+import ExploreEventsScreen from '../screens/hotthisweekevents/ExploreEvents';
+import ExploreLocalGlobalDetailScreen from '../screens/hotthisweekevents/ExploreLocalGlobalDetailScreen';
+import HotThisWeekScreen from '../screens/hotthisweekevents/HotThisWeekScreen';
 import InitialScreen from '../screens/InitialScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MyTabs from '../screens/MyTabs';
+import NearbyEventsScreen from '../screens/nearbyevents/NearbyEventsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import OtpLoginScreen from '../screens/OtpLoginScreen';
 import SplashScreenComponent from '../screens/SplashScreen';
 import SettingsScreen from '../screens/Tickets';
-import BlazingDealDetailScreen from '../screens/blazingdealdetail/BlazingDealDetailScreen';
-import NearbyEventsScreen from '../screens/nearbyevents/NearbyEventsScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -164,6 +167,33 @@ function Navigation({ route }) {
         <Stack.Screen
           name="BlazingDealDetail"
           component={BlazingDealDetailScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="ExploreEvents"
+          component={ExploreEventsScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="ExploreAllEvents"
+          component={ExploreAllEventsScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="ExploreLocalGlobalDetailScreen"
+          component={ExploreLocalGlobalDetailScreen}
           options={{
             headerShown: false,
             unmountOnBlur: true,

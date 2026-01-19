@@ -74,7 +74,11 @@
       },
       "eas": {
         "projectId": "32253af1-066b-49fc-9971-d66fb0bb8c2b"
-      }
+      },
+      "API_BASE_URL": "https://d1-api.hexallo.com/",
+      "GOOGLE_MAPS_API_KEY": "YOUR_GOOGLE_MAPS_API_KEY",
+      "ENV": "development",
+      "ENABLE_LOGGING": "true"
     }
   }
 }
