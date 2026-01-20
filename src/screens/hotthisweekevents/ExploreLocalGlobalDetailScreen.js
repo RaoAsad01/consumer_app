@@ -1,3 +1,4 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
     Dimensions,
@@ -30,31 +31,31 @@ const CATEGORIES = [
 const TOP_LOCAL_DESTINATIONS_DATA = [
     {
         id: '1',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Tokyo',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400',
         date: 'Sat 12 Jan 2026 - Wed 15 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Tokyo, Japan',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '2',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Paris',
+        description: 'Experience the magic of the City of Lights with world-class cuisine, iconic landmarks, and unforgettable cultural experiences.',
+        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Paris, France',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '3',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'New York',
+        description: 'The city that never sleeps offers endless entertainment, dining, and cultural experiences for every traveler.',
+        image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
         location: 'New York, NY United States',
@@ -63,23 +64,23 @@ const TOP_LOCAL_DESTINATIONS_DATA = [
     },
     {
         id: '4',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'London',
+        description: 'Discover the perfect blend of historic charm and modern excitement in this iconic British capital.',
+        image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'London, United Kingdom',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '5',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Dubai',
+        description: 'Experience luxury and innovation in this dazzling desert metropolis with stunning architecture and world-class attractions.',
+        image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Dubai, UAE',
         price: 25,
         isBookmarked: false,
     },
@@ -146,56 +147,56 @@ const GLOBAL_EVENTS_DATA = [
 const TOP_GLOBAL_DESTINATIONS_DATA = [
     {
         id: '1',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Sydney',
+        description: 'Explore the stunning harbor city with iconic landmarks, beautiful beaches, and vibrant cultural scene.',
+        image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=400',
         date: 'Sat 12 Jan 2026 - Wed 15 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Sydney, Australia',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '2',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Barcelona',
+        description: 'Discover the artistic wonders of Gaudí, delicious tapas, and the Mediterranean lifestyle in this Spanish gem.',
+        image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Barcelona, Spain',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '3',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Singapore',
+        description: 'Experience the perfect blend of cultures, futuristic architecture, and world-renowned street food.',
+        image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Singapore',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '4',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Rome',
+        description: 'Walk through history in the Eternal City with ancient ruins, Renaissance art, and authentic Italian cuisine.',
+        image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Rome, Italy',
         price: 25,
         isBookmarked: false,
     },
     {
         id: '5',
-        title: 'Coffee Chat',
-        description: 'Experience engaging activities and connect with like-minded individuals. Don\'t miss out on this opportunity to learn and grow!.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        title: 'Bali',
+        description: 'Find paradise in this Indonesian island with stunning temples, rice terraces, and serene beaches.',
+        image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400',
         date: 'Sat 12 Jan 2026',
         time: '9:00am - 5:00pm',
-        location: 'New York, NY United States',
+        location: 'Bali, Indonesia',
         price: 25,
         isBookmarked: false,
     },
@@ -206,14 +207,20 @@ const SCREEN_CONFIG = {
     'TopLocalDestinations': {
         title: 'Explore Top Local Destinations',
         data: TOP_LOCAL_DESTINATIONS_DATA,
+        navigateToDetail: true,
+        detailType: 'local',
     },
     'GlobalEvents': {
         title: 'Explore Global Events',
         data: GLOBAL_EVENTS_DATA,
+        navigateToDetail: false,
+        detailType: 'event',
     },
     'TopGlobalDestinations': {
         title: 'Explore Top Global Destinations',
         data: TOP_GLOBAL_DESTINATIONS_DATA,
+        navigateToDetail: true,
+        detailType: 'global',
     },
 };
 
@@ -390,7 +397,10 @@ const DetailEventCard = ({ item, onPress, onBookmarkPress }) => {
 };
 
 // ============ Main Screen ============
-const ExploreLocalGlobalDetailScreen = ({ navigation, route }) => {
+const ExploreLocalGlobalDetailScreen = () => {
+    const navigation = useNavigation();
+    const route = useRoute();
+    
     // Get screen type from route params (default to GlobalEvents)
     const screenType = route?.params?.screenType || 'GlobalEvents';
     const config = SCREEN_CONFIG[screenType] || SCREEN_CONFIG['GlobalEvents'];
@@ -413,6 +423,20 @@ const ExploreLocalGlobalDetailScreen = ({ navigation, route }) => {
 
     const handleItemPress = (item) => {
         logger.debug('Item pressed:', item.title);
+        
+        // Navigate to DestinationDetailScreen for TopLocalDestinations and TopGlobalDestinations
+        if (config.navigateToDetail) {
+            navigation?.navigate('DestinationsDetailScreen', {
+                destinationId: item.id,
+                type: config.detailType,
+                destination: {
+                    id: item.id,
+                    name: item.title,
+                    image: item.image,
+                    description: item.description,
+                },
+            });
+        }
     };
 
     const handleBookmarkPress = (item) => {

@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import BlazingDealDetailScreen from '../screens/blazingdealdetail/BlazingDealDetailScreen';
 import GetStartedScreen from '../screens/GetStartedScreen';
+import DestinationsDetailScreen from '../screens/hotthisweekevents/DestinationsDetailScreen';
 import ExploreAllEventsScreen from '../screens/hotthisweekevents/ExploreAllEvents';
 import ExploreEventsScreen from '../screens/hotthisweekevents/ExploreEvents';
 import ExploreLocalGlobalDetailScreen from '../screens/hotthisweekevents/ExploreLocalGlobalDetailScreen';
@@ -18,7 +19,6 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import OtpLoginScreen from '../screens/OtpLoginScreen';
 import SplashScreenComponent from '../screens/SplashScreen';
 import SettingsScreen from '../screens/Tickets';
-
 
 const Stack = createNativeStackNavigator();
 
@@ -194,6 +194,15 @@ function Navigation({ route }) {
         <Stack.Screen
           name="ExploreLocalGlobalDetailScreen"
           component={ExploreLocalGlobalDetailScreen}
+          options={{
+            headerShown: false,
+            unmountOnBlur: true,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="DestinationsDetailScreen"
+          component={DestinationsDetailScreen}
           options={{
             headerShown: false,
             unmountOnBlur: true,

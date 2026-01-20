@@ -6,6 +6,8 @@ import AddIcon from '../../assets/svgs/add_icon.svg';
 import ArrowDown from '../../assets/svgs/arrow-down.svg';
 import AuditionsCategoryIcon from '../../assets/svgs/auditions_category_icon.svg';
 import BackArrow from '../../assets/svgs/back_arrow.svg';
+import BackArrowWhite from '../../assets/svgs/back_arrow_white.svg';
+import BackArrowWithBg from '../../assets/svgs/back_arrow_with_bg.svg';
 import BackIcon from '../../assets/svgs/back_icon.svg';
 import NotificationBellIcon from '../../assets/svgs/bell_notification_icon.svg';
 import BookmarkSelectedIcon from '../../assets/svgs/bookmark_selected_icon.svg';
@@ -61,6 +63,7 @@ import MobMoneyIconActive from '../../assets/svgs/mobmoney_icon_active.svg';
 import MobMoneyIconInActive from '../../assets/svgs/mobmoney_icon_inactive.svg';
 import MoreInactiveBottomIcon from '../../assets/svgs/more-inactive-bottom-icon.svg';
 import MoreActiveBottomIcon from '../../assets/svgs/more_active_bottomtab_icon.svg';
+import MoreDotsIcon from '../../assets/svgs/more_dots_icon.svg';
 import MoviesCategoryIcon from '../../assets/svgs/movies_category_icon.svg';
 import NightlifeCategoryIcon from '../../assets/svgs/nightlife_category_icon.svg';
 import NoResultsIcon from '../../assets/svgs/no-results-icon.svg';
@@ -82,6 +85,8 @@ import RightArrowIcon from '../../assets/svgs/right_arrow_icon.svg';
 import SearchBarIcon from '../../assets/svgs/search_bar_icon.svg';
 import SearchIcon from '../../assets/svgs/search_icon.svg';
 import SeacrhIconBrown from '../../assets/svgs/search_icon_brown.svg';
+import SeacrhIconWhite from '../../assets/svgs/search_icon_white.svg';
+import SearchIconWithBg from '../../assets/svgs/search_icon_with_bg.svg';
 import ServicesInactiveBottomIcon from '../../assets/svgs/services-inactive-bottom-icon.svg';
 import ServicesActiveBottomIcon from '../../assets/svgs/services_active_bottomtab_icon.svg';
 import ShadowGlowSplash from '../../assets/svgs/shadow-glow-splash.svg';
@@ -226,5 +231,10 @@ export default {
     pinLocationIcon: PinLocationIcon,
     notificationBellIcon: NotificationBellIcon,
     rightArrowIcon: RightArrowIcon,
+    backArrowWhite: BackArrowWhite,
+    seacrhIconWhite: SeacrhIconWhite,
+    searchIconWithBg: SearchIconWithBg,
+    backArrowWithBg: BackArrowWithBg,
+    moreDotsIcon: MoreDotsIcon,
 };
 

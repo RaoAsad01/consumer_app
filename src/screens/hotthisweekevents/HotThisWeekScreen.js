@@ -1,9 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import * as NavigationBar from 'expo-navigation-bar';
+import React, { useEffect, useState } from 'react';
 import {
     Dimensions,
     FlatList,
     Image,
+    Platform,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -12,9 +14,9 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { color } from '../../color/color';
 import SvgIcons from '../../components/SvgIcons';
 import Typography from '../../components/Typography';
+import { getTheme } from '../../constants/themes';
 import logger from '../../utils/logger';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -82,89 +84,112 @@ const EVENTS_DATA = [
         price: 15,
         isBookmarked: false,
     },
+];
+
+const NIGHTLIFE_DATA = [
     {
-        id: '6',
-        title: 'Q/A Session',
-        image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
-        price: 25,
-        isBookmarked: false,
-    },
-    {
-        id: '7',
-        title: 'Girls Meetup',
+        id: '1',
+        title: 'New Year\'s Eve Gala',
         image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
-        date: 'Fri, 05 May 2023',
-        time: '7:00pm - 12:00 am',
-        location: 'Nishat Mall, Lahore, Punjab',
+        date: 'Sun, 31 Dec 2023',
+        time: '8:00pm - 1:00am',
+        location: 'Grand Ballroom, Las Vegas, NV',
         price: 25,
         isBookmarked: false,
     },
     {
-        id: '8',
-        title: 'Tech Conference 2023',
-        image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400',
-        date: 'Sat, 12 Aug 2023',
-        time: '9:00am - 5:00pm',
-        location: 'Hilton Hotel, New York, NY',
+        id: '2',
+        title: 'New Year\'s Eve Gala',
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        date: 'Sun, 31 Dec 2023',
+        time: '8:00pm - 1:00am',
+        location: 'Grand Ballroom, Las Vegas, NV',
         price: 25,
         isBookmarked: false,
     },
     {
-        id: '9',
-        title: 'Music Festival',
-        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-        date: 'Sun, 20 Aug 2023',
-        time: '4:00pm - 11:00pm',
-        location: 'Central Park, New York, NY',
-        price: 50,
-        isBookmarked: true,
+        id: '3',
+        title: 'New Year\'s Eve Gala',
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        date: 'Sun, 31 Dec 2023',
+        time: '8:00pm - 1:00am',
+        location: 'Grand Ballroom, Las Vegas, NV',
+        price: 25,
+        isBookmarked: false,
     },
     {
-        id: '10',
-        title: 'Art Exhibition',
-        image: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=400',
-        date: 'Mon, 25 Aug 2023',
-        time: '10:00am - 6:00pm',
-        location: 'Modern Art Museum, LA',
-        price: 15,
+        id: '4',
+        title: 'New Year\'s Eve Gala',
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        date: 'Sun, 31 Dec 2023',
+        time: '8:00pm - 1:00am',
+        location: 'Grand Ballroom, Las Vegas, NV',
+        price: 25,
+        isBookmarked: false,
+    },
+    {
+        id: '5',
+        title: 'New Year\'s Eve Gala',
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+        date: 'Sun, 31 Dec 2023',
+        time: '8:00pm - 1:00am',
+        location: 'Grand Ballroom, Las Vegas, NV',
+        price: 25,
         isBookmarked: false,
     },
 ];
 
+// Categories that use dark theme
+const DARK_THEME_CATEGORIES = ['nightlife'];
+
 // ============ Components ============
 
 // Header Component
-const Header = ({ onBackPress, onSearchPress }) => {
+const Header = ({ onBackPress, onSearchPress, theme }) => {
+    // Determine if dark theme is active
+    const isDarkTheme = theme.statusBarStyle === 'light-content';
+
     return (
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: theme.headerBackground }]}>
             <TouchableOpacity
                 onPress={onBackPress}
                 style={styles.headerButton}
-                activeOpacity={0.7}
             >
-                <SvgIcons.backIcon width={20} height={20} />
+                {isDarkTheme ? (
+                    <SvgIcons.backArrowWhite width={20} height={20} />
+                ) : (
+                    <SvgIcons.backIcon
+                        width={20}
+                        height={20}
+                        color={theme.titleColor}
+                    />
+                )}
             </TouchableOpacity>
 
-            <Typography weight="700" size={18} color={color.brown_3C200A}>
+            <Typography weight="700" size={18} color={theme.titleColor}>
                 Hot This Week
             </Typography>
 
             <TouchableOpacity
                 onPress={onSearchPress}
                 style={styles.headerButton}
-                activeOpacity={0.7}
             >
-                <SvgIcons.seacrhIconBrown width={20} height={20} />
+                {isDarkTheme ? (
+                    <SvgIcons.seacrhIconWhite width={20} height={20} />
+                ) : (
+                    <SvgIcons.seacrhIconBrown
+                        width={20}
+                        height={20}
+                        color={theme.titleColor}
+                    />
+                )}
             </TouchableOpacity>
         </View>
     );
 };
 
 // Category Tab Item
-const CategoryTab = ({ item, isActive, onPress }) => {
+const CategoryTab = ({ item, isActive, onPress, theme }) => {
     return (
         <TouchableOpacity
             onPress={() => onPress(item.id)}
@@ -174,19 +199,26 @@ const CategoryTab = ({ item, isActive, onPress }) => {
             <Typography
                 weight={isActive ? '600' : '450'}
                 size={14}
-                color={isActive ? color.brown_5A2F0E : color.grey_87807C}
+                color={isActive ? theme.tabActiveColor : theme.tabInactiveColor}
             >
                 {item.label}
             </Typography>
-            {isActive && <View style={styles.categoryTabIndicator} />}
+            {isActive && (
+                <View
+                    style={[
+                        styles.categoryTabIndicator,
+                        { backgroundColor: theme.tabIndicatorColor }
+                    ]}
+                />
+            )}
         </TouchableOpacity>
     );
 };
 
 // Category Tabs
-const CategoryTabs = ({ activeCategory, onCategoryChange }) => {
+const CategoryTabs = ({ activeCategory, onCategoryChange, theme }) => {
     return (
-        <View style={styles.categoryTabsWrapper}>
+        <View style={[styles.categoryTabsWrapper, { backgroundColor: theme.headerBackground }]}>
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -198,6 +230,7 @@ const CategoryTabs = ({ activeCategory, onCategoryChange }) => {
                         item={category}
                         isActive={activeCategory === category.id}
                         onPress={onCategoryChange}
+                        theme={theme}
                     />
                 ))}
             </ScrollView>
@@ -206,10 +239,10 @@ const CategoryTabs = ({ activeCategory, onCategoryChange }) => {
 };
 
 // Event Card Component
-const EventCard = ({ item, onPress, onBookmarkPress }) => {
+const EventCard = ({ item, onPress, onBookmarkPress, theme }) => {
     return (
         <TouchableOpacity
-            style={styles.eventCard}
+            style={[styles.eventCard]}
             onPress={() => onPress(item)}
             activeOpacity={0.9}
         >
@@ -228,7 +261,7 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
                     <Typography
                         weight="700"
                         size={16}
-                        color={color.placeholderTxt_24282C}
+                        color={theme.cardTitleColor}
                         style={styles.eventTitle}
                     >
                         {item.title}
@@ -241,7 +274,11 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
                         {item.isBookmarked ? (
                             <SvgIcons.bookmarkSelectedIcon width={20} height={20} />
                         ) : (
-                            <SvgIcons.bookmarkUnselectedIcon width={20} height={20} />
+                            <SvgIcons.bookmarkUnselectedIcon
+                                width={20}
+                                height={20}
+                                color={theme.cardTextColor}
+                            />
                         )}
                     </TouchableOpacity>
                 </View>
@@ -249,7 +286,7 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
                 <Typography
                     weight="450"
                     size={12}
-                    color={color.brown_766F6A}
+                    color={theme.cardTextColor}
                     style={styles.eventDate}
                 >
                     {item.date}
@@ -258,7 +295,7 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
                 <Typography
                     weight="450"
                     size={12}
-                    color={color.brown_766F6A}
+                    color={theme.cardTextColor}
                     style={styles.eventTime}
                 >
                     {item.time}
@@ -267,17 +304,17 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
                 <Typography
                     weight="450"
                     size={14}
-                    color={color.brown_766F6A}
+                    color={theme.cardTextColor}
                     style={styles.eventLocation}
                 >
                     {item.location}
                 </Typography>
 
                 <View style={styles.eventPriceRow}>
-                    <Typography weight="450" size={10} color={color.brown_766F6A}>
+                    <Typography weight="450" size={10} color={theme.cardTextColor}>
                         from{' '}
                     </Typography>
-                    <Typography weight="700" size={12} color={color.brown_766F6A}>
+                    <Typography weight="700" size={12} color={theme.cardTextColor}>
                         ${item.price}
                     </Typography>
                 </View>
@@ -290,7 +327,32 @@ const EventCard = ({ item, onPress, onBookmarkPress }) => {
 const HotThisWeekScreen = () => {
     const navigation = useNavigation();
     const [activeCategory, setActiveCategory] = useState('events');
-    const [events, setEvents] = useState(EVENTS_DATA);
+    const [eventsData, setEventsData] = useState(EVENTS_DATA);
+    const [nightlifeData, setNightlifeData] = useState(NIGHTLIFE_DATA);
+
+    // Get theme based on active category
+    const theme = getTheme(activeCategory, DARK_THEME_CATEGORIES);
+
+    // Apply navigation bar theme when category changes
+    useEffect(() => {
+        if (Platform.OS === 'android') {
+            NavigationBar.setBackgroundColorAsync(theme.navigationBarColor);
+            NavigationBar.setButtonStyleAsync(
+                theme.statusBarStyle === 'light-content' ? 'light' : 'dark'
+            );
+        }
+    }, [theme]);
+
+    // Get current data based on active category
+    const getCurrentData = () => {
+        switch (activeCategory) {
+            case 'nightlife':
+                return nightlifeData;
+            case 'events':
+            default:
+                return eventsData;
+        }
+    };
 
     const handleBackPress = () => {
         navigation?.goBack();
@@ -310,15 +372,28 @@ const HotThisWeekScreen = () => {
     };
 
     const handleBookmarkPress = (event) => {
-        setEvents((prevEvents) =>
-            prevEvents.map((e) =>
-                e.id === event.id ? { ...e, isBookmarked: !e.isBookmarked } : e
-            )
-        );
+        if (activeCategory === 'nightlife') {
+            setNightlifeData((prevData) =>
+                prevData.map((e) =>
+                    e.id === event.id ? { ...e, isBookmarked: !e.isBookmarked } : e
+                )
+            );
+        } else {
+            setEventsData((prevData) =>
+                prevData.map((e) =>
+                    e.id === event.id ? { ...e, isBookmarked: !e.isBookmarked } : e
+                )
+            );
+        }
     };
 
     const handleExploreMoreEvents = () => {
         navigation?.navigate('ExploreEvents');
+    };
+
+    const handleExploreNightlife = () => {
+        logger.debug('Explore Nightlife pressed');
+        // No navigation - just log for now
     };
 
     const renderEventCard = ({ item }) => (
@@ -326,40 +401,74 @@ const HotThisWeekScreen = () => {
             item={item}
             onPress={handleEventPress}
             onBookmarkPress={handleBookmarkPress}
+            theme={theme}
         />
     );
 
     const renderListFooter = () => (
         <View style={styles.footerContainer}>
-            <TouchableOpacity
-                style={styles.exploreButton}
-                onPress={handleExploreMoreEvents}
-                activeOpacity={0.8}
-            >
-                <Text style={styles.exploreButtonText}>Explore More Events</Text>
-            </TouchableOpacity>
+            {activeCategory === 'events' && (
+                <TouchableOpacity
+                    style={[
+                        styles.exploreButton,
+                        { backgroundColor: theme.buttonBackground }
+                    ]}
+                    onPress={handleExploreMoreEvents}
+                    activeOpacity={0.8}
+                >
+                    <Text style={[styles.exploreButtonText, { color: theme.buttonTextColor }]}>
+                        Explore More Events
+                    </Text>
+                </TouchableOpacity>
+            )}
+            
+            {activeCategory === 'nightlife' && (
+                <TouchableOpacity
+                    style={[
+                        styles.exploreButton,
+                        { backgroundColor: theme.buttonBackground }
+                    ]}
+                    onPress={handleExploreNightlife}
+                    activeOpacity={0.8}
+                >
+                    <Text style={[styles.exploreButtonText, { color: theme.buttonTextColor }]}>
+                        Explore Nightlife
+                    </Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <StatusBar barStyle="dark-content" backgroundColor={color.white_FFFFFF} />
+        <SafeAreaView
+            style={[styles.container, { backgroundColor: theme.backgroundColor }]}
+            edges={['top']}
+        >
+            <StatusBar
+                barStyle={theme.statusBarStyle}
+                backgroundColor={theme.backgroundColor}
+            />
 
             {/* Header */}
-            <Header onBackPress={handleBackPress} onSearchPress={handleSearchPress} />
+            <Header
+                onBackPress={handleBackPress}
+                onSearchPress={handleSearchPress}
+                theme={theme}
+            />
 
             {/* Category Tabs */}
             <CategoryTabs
                 activeCategory={activeCategory}
                 onCategoryChange={handleCategoryChange}
+                theme={theme}
             />
 
             {/* Divider */}
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.dividerColor }]} />
 
             {/* Events List */}
             <FlatList
-                data={events}
+                data={getCurrentData()}
                 renderItem={renderEventCard}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.eventsList}
@@ -375,7 +484,6 @@ const HotThisWeekScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: color.white_FFFFFF,
     },
 
     // Header
@@ -385,7 +493,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: color.white_FFFFFF,
     },
     headerButton: {
         width: 40,
@@ -396,7 +503,6 @@ const styles = StyleSheet.create({
 
     // Category Tabs
     categoryTabsWrapper: {
-        backgroundColor: color.white_FFFFFF,
     },
     categoryTabsContainer: {
         paddingHorizontal: 24,
@@ -412,14 +518,12 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 2,
-        backgroundColor: color.brown_5A2F0E,
         borderRadius: 1,
     },
 
     // Divider
     divider: {
         height: 1,
-        backgroundColor: '#F0F0F0',
     },
 
     // Events List
@@ -433,7 +537,6 @@ const styles = StyleSheet.create({
 
     // Event Card
     eventCard: {
-        backgroundColor: color.white_FFFFFF,
     },
     eventImageContainer: {
         width: '100%',
@@ -484,7 +587,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     exploreButton: {
-        backgroundColor: color.btnTxt_FFF6DF,
         borderRadius: 25,
         paddingVertical: 14,
         paddingHorizontal: 32,
@@ -494,7 +596,6 @@ const styles = StyleSheet.create({
     exploreButtonText: {
         fontSize: 14,
         fontWeight: '400',
-        color: color.btnBrown_AE6F28,
         letterSpacing: 0.3,
     },
 });
